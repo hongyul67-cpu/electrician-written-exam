@@ -10,5 +10,5 @@
 // ─────────────────────────────────────────────────────────────
 window.ELECEXAM_CONFIG = {
   syncUrl: "",         // 예: "https://script.google.com/macros/s/AKfy..../exec"
-  resultEndpoint: ""   // 예: "https://script.google.com/macros/s/AKfy..../exec"
+  resultEndpoint: "https://script.google.com/macros/s/AKfycbxcNlg5DKf6gbsmHqc-gFJ2acr4SWYz_7yIS-Af2CH-ZP_0RgWOYer4siEKQw_7YQ5mCQ/exec"
 };

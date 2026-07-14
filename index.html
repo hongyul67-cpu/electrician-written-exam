@@ -601,12 +601,16 @@ else home();
 </script>
 <!-- 결과 수집 위젯:
      · config.js의 resultEndpoint를 채우면 → 결과 화면에 [📤 결과 제출] 버튼이 항상 표시
-     · 비워두면 → 선생님이 만든 ?rc=<exec URL> 링크로 접속할 때만 제출 버튼 표시 -->
+     · 비워두면 → 선생님이 만든 ?rc=<exec URL> 링크로 접속할 때만 제출 버튼 표시
+     · 과제별 수집: 링크에 ?assign=<과제명> 을 붙이면 그 과제 이름의 시트 탭으로 따로 모입니다.
+       예) …/electrician-written-exam/?assign=1주차   →  탭 "전기기능사 필기 · 1주차" -->
 <script>(function(){
   var cfg=window.ELECEXAM_CONFIG||{};
+  function qp(n){try{return new URLSearchParams(location.search).get(n);}catch(e){return null;}}
+  var assign=((qp('assign')||qp('hw')||'')+'').trim().slice(0,40);
   var s=document.createElement('script');
   s.src="https://hongyul67-cpu.github.io/links/collector.js";
-  s.setAttribute('data-tool','전기기능사 필기');
+  s.setAttribute('data-tool','전기기능사 필기'+(assign?' · '+assign:''));
   s.setAttribute('data-max-num','40');
   if(cfg.resultEndpoint) s.setAttribute('data-endpoint',cfg.resultEndpoint);
   document.body.appendChild(s);
