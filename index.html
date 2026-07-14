@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전기기능사 필기 · 기출 마스터</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#ffffff; --ink:#1e293b; --muted:#64748b;
+    --brand:#d97706; --brand-d:#b45309; --line:#e2e8f0;
+    --ok:#16a34a; --ok-bg:#dcfce7; --no:#dc2626; --no-bg:#fee2e2;
+    --soft:#f1f5f9; --gold:#f59e0b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:"Malgun Gothic","맑은 고딕",system-ui,-apple-system,sans-serif;
+    background:linear-gradient(160deg,#1c1917,#78350f);color:var(--ink);min-height:100vh}
+  .wrap{max-width:820px;margin:0 auto;padding:16px 14px 60px}
+  header.top{display:flex;align-items:center;gap:10px;color:#fff;padding:6px 2px 14px}
+  header.top .logo{font-size:22px}
+  header.top h1{font-size:18px;margin:0;font-weight:800;letter-spacing:-.5px}
+  header.top .sub{font-size:12px;color:#c7d2fe;margin-top:2px}
+  .card{background:var(--panel);border-radius:16px;box-shadow:0 10px 30px rgba(2,6,23,.28);padding:18px}
+  /* home */
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+  .mode{cursor:pointer;border:1px solid var(--line);border-radius:14px;padding:16px;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--brand);transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,99,235,.15)}
+  .mode .ic{font-size:26px}
+  .mode h3{margin:8px 0 4px;font-size:16px}
+  .mode p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5}
+  .mode.wide{grid-column:1/3}
+  .stat{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .chip{background:var(--soft);border-radius:10px;padding:8px 12px;font-size:12.5px;color:#334155}
+  .chip b{color:var(--brand)}
+  /* generic */
+  .btn{border:0;border-radius:11px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.primary:hover{background:var(--brand-d)}
+  .btn.ghost{background:var(--soft);color:#334155}
+  .btn.block{width:100%}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .back{background:none;border:0;color:#c7d2fe;font-size:14px;cursor:pointer;padding:6px 2px;font-family:inherit}
+  .pill{display:inline-block;background:#eef2ff;color:var(--brand);border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700}
+  .subjbar{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px}
+  .subjbar button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;cursor:pointer;font-family:inherit;color:#475569}
+  .subjbar button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .rsubs{display:flex;flex-wrap:wrap;gap:8px}
+  .rsub{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;cursor:pointer;background:#fff}
+  .rsub input{cursor:pointer}
+  label select{margin-left:4px}
+  /* question */
+  .qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+  .qno{font-weight:800;color:var(--brand);font-size:15px}
+  .qsubj{font-size:11.5px;color:var(--muted)}
+  .qtext{font-size:16.5px;line-height:1.6;font-weight:600;margin:6px 0 12px;word-break:keep-all}
+  .qimg{width:100%;border:1px solid var(--line);border-radius:10px;margin:4px 0 14px;background:#fff}
+  .choices{display:flex;flex-direction:column;gap:9px}
+  .choice{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 13px;cursor:pointer;transition:.12s;background:#fff;font-size:15px;line-height:1.5}
+  .choice:hover{border-color:#93c5fd;background:#f8fafc}
+  .choice .num{font-weight:800;color:#64748b;flex:0 0 auto}
+  .choice.sel{border-color:var(--brand);background:#eff6ff}
+  .choice.correct{border-color:var(--ok);background:var(--ok-bg)}
+  .choice.wrong{border-color:var(--no);background:var(--no-bg)}
+  .choice.disabled{cursor:default}
+  .expl{margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.65;color:#78350f;display:none;word-break:keep-all}
+  .expl.show{display:block}
+  .expl b{color:#b45309}
+  .expl b.ansline{display:block;color:#166534;background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:15px}
+  .navbtns{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+  /* OMR grid */
+  .omr{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:6px}
+  .omr button{aspect-ratio:1;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;color:#475569}
+  .omr button.done{background:#dbeafe;border-color:#93c5fd;color:var(--brand);font-weight:700}
+  .omr button.cur{outline:2px solid var(--brand);outline-offset:1px}
+  .timer{font-weight:800;font-size:15px;color:#0f172a;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:6px 12px}
+  .timer.warn{color:#b91c1c;background:#fee2e2;border-color:#fecaca}
+  /* result */
+  .scorebig{font-size:44px;font-weight:900;text-align:center;letter-spacing:-1px}
+  .passbar{height:14px;border-radius:999px;background:#e2e8f0;overflow:hidden;margin:14px 0}
+  .passbar > div{height:100%;border-radius:999px}
+  .result-note{text-align:center;font-size:15px;margin-top:6px}
+  .miniq{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+  .miniq .qtext{font-size:14.5px;font-weight:600;margin:2px 0 8px}
+  .tag-ok{color:var(--ok);font-weight:800}
+  .tag-no{color:var(--no);font-weight:800}
+  .empty{text-align:center;color:var(--muted);padding:34px 10px;font-size:14.5px}
+  .foot{color:#94a3b8;font-size:11.5px;text-align:center;margin-top:22px}
+  select{font-family:inherit;font-size:14px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:#fff}
+  @media(max-width:520px){.omr{grid-template-columns:repeat(8,1fr)}.modes{grid-template-columns:1fr}.mode.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">⚡</div>
+    <div>
+      <h1>전기기능사 필기 · 기출 마스터</h1>
+      <div class="sub">CBT 복원 기출로 실전처럼 · 해설·오답노트 포함</div>
+    </div>
+  </header>
+  <div id="app"></div>
+  <div class="foot">합격 기준: 100점 만점 60점 이상 · 데이터 출처: 전기기능사 필기 CBT 기출복원문제</div>
+</div>
+
+<script src="data/2025-4.js"></script>
+<script src="data/2025-3.js"></script>
+<script src="data/2025-2.js"></script>
+<script src="data/2025-1.js"></script>
+<script src="data/2024-4.js"></script>
+<script src="data/2024-3.js"></script>
+<script src="data/2024-2.js"></script>
+<script src="data/2024-1.js"></script>
+<script src="data/2023-4.js"></script>
+<script src="data/2023-3.js"></script>
+<script src="data/2023-2.js"></script>
+<script src="data/2023-1.js"></script>
+<script src="data/2022-4.js"></script>
+<script src="data/2022-3.js"></script>
+<script src="data/2022-2.js"></script>
+<script src="data/2022-1.js"></script>
+<script src="data/2021-4.js"></script>
+<script src="data/2021-3.js"></script>
+<script src="data/2021-2.js"></script>
+<script src="data/2021-1.js"></script>
+<script src="data/2020-4.js"></script>
+<script src="data/2020-3.js"></script>
+<script src="data/2020-2.js"></script>
+<script src="data/2020-1.js"></script>
+<script src="config.js"></script>
+<script>
+const $=(s,el=document)=>el.querySelector(s);
+const app=$("#app");
+const EXAMS=(window.EXAMS||[]).sort((a,b)=>(b.year-a.year)||(b.round-a.round));
+const NUM=["","①","②","③","④","⑤"];
+const LS={
+  wrongKey:"elecexam_wrong_v1", statKey:"elecexam_stat_v1",
+  getWrong(){try{return JSON.parse(localStorage.getItem(this.wrongKey))||[]}catch(e){return[]}},
+  setWrong(a){localStorage.setItem(this.wrongKey,JSON.stringify(a))},
+  addWrong(examKey,no){const w=this.getWrong();if(!w.some(x=>x.k===examKey&&x.no===no)){w.push({k:examKey,no});this.setWrong(w)}},
+  removeWrong(examKey,no){this.setWrong(this.getWrong().filter(x=>!(x.k===examKey&&x.no===no)))},
+  getStat(){try{return JSON.parse(localStorage.getItem(this.statKey))||{solved:0,correct:0,exams:0}}catch(e){return{solved:0,correct:0,exams:0}}},
+  setStat(s){localStorage.setItem(this.statKey,JSON.stringify(s))},
+  subjKey:"elecexam_statsubj_v1",
+  getStatSubj(){try{return JSON.parse(localStorage.getItem(this.subjKey))||{}}catch(e){return{}}},
+  setStatSubj(s){localStorage.setItem(this.subjKey,JSON.stringify(s))},
+  addSubjResult(subj,ok){const s=this.getStatSubj();if(!s[subj])s[subj]={solved:0,correct:0};s[subj].solved++;if(ok)s[subj].correct++;this.setStatSubj(s);}
+};
+
+/* ---------------- 클라우드 동기화 (Google 시트 / Apps Script) ---------------- */
+const SYNC_URL=(window.ELECEXAM_CONFIG&&window.ELECEXAM_CONFIG.syncUrl)||"";
+const SYNC={
+  meKey:"elecexam_me_v1", _t:null,
+  on(){return !!SYNC_URL;},
+  me(){try{return JSON.parse(localStorage.getItem(this.meKey))}catch(e){return null}},
+  setMe(m){localStorage.setItem(this.meKey,JSON.stringify(m));},
+  ready(){return this.on()&&!!this.me();},
+  _post(obj){if(!this.ready())return;
+    try{fetch(SYNC_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)});}catch(e){}},
+  save(){if(!this.ready())return;const me=this.me();
+    this._post({action:"save",cls:me.cls,name:me.name,wrong:LS.getWrong(),stat:LS.getStat()});flashSync();},
+  saveSoon(){if(!this.ready())return;clearTimeout(this._t);this._t=setTimeout(()=>this.save(),1200);},
+  result(exam,score,correct,total){if(!this.ready())return;const me=this.me();
+    this._post({action:"result",cls:me.cls,name:me.name,exam:exam,score:score,correct:correct,total:total});},
+  load(){if(!this.ready())return Promise.resolve(null);const me=this.me();
+    const u=SYNC_URL+"?action=load&cls="+encodeURIComponent(me.cls)+"&name="+encodeURIComponent(me.name);
+    return jsonp(u).catch(()=>null);}
+};
+function jsonp(url){return new Promise((res,rej)=>{
+  const cb="__jp"+Math.random().toString(36).slice(2);
+  window[cb]=d=>{res(d);done();};
+  const s=document.createElement("script");
+  s.src=url+(url.indexOf("?")<0?"?":"&")+"callback="+cb;
+  s.onerror=()=>{rej(new Error("net"));done();};
+  function done(){try{delete window[cb]}catch(e){}s.remove();}
+  document.body.appendChild(s);
+  setTimeout(()=>{if(window[cb]){rej(new Error("timeout"));done();}},10000);
+});}
+function flashSync(){const el=$("#syncdot");if(!el)return;el.textContent="☁ 저장됨";el.style.color="var(--ok)";
+  setTimeout(()=>{const e2=$("#syncdot");if(e2){e2.textContent="☁ 자동 저장";e2.style.color="";}},1400);}
+function mergeRemote(r){if(!r||(r.found===false))return;
+  const local=LS.getWrong(),rem=r.wrong||[],seen=new Set(local.map(x=>x.k+"#"+x.no));
+  rem.forEach(x=>{const kk=x.k+"#"+x.no;if(!seen.has(kk)){local.push({k:x.k,no:x.no});seen.add(kk);}});
+  LS.setWrong(local);
+  if(r.stat){const ls=LS.getStat();if((r.stat.solved||0)>=(ls.solved||0))
+    LS.setStat({solved:r.stat.solved||0,correct:r.stat.correct||0,exams:r.stat.exams||ls.exams||0});}
+}
+function gate(){
+  app.innerHTML=`
+  <div class="card">
+    <span class="pill">학습자 확인</span>
+    <h3 style="margin:10px 0 6px">누구인지 알려주세요</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">진도·오답노트를 저장해 어느 기기에서든 이어서 학습할 수 있어요.</p>
+    <div class="row" style="margin-bottom:10px">반 <input id="inCls" placeholder="예: 2-3" style="flex:1;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px"></div>
+    <div class="row">이름 <input id="inName" placeholder="예: 홍길동" style="flex:1;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px"></div>
+    <div class="navbtns" style="margin-top:16px"><span></span><button class="btn primary" onclick="doLogin()">시작 ▶</button></div>
+  </div>`;
+  const me=SYNC.me();if(me){$("#inCls").value=me.cls||"";$("#inName").value=me.name||"";}
+  setTimeout(()=>{const el=$("#inName");if(el)el.focus();},50);
+}
+async function doLogin(){
+  const cls=($("#inCls").value||"").trim(),name=($("#inName").value||"").trim();
+  if(!name){alert("이름을 입력해 주세요.");return;}
+  SYNC.setMe({cls,name});
+  app.innerHTML=`<div class="card"><div class="empty">이어할 내용을 불러오는 중… ⏳</div></div>`;
+  try{const r=await SYNC.load();mergeRemote(r);}catch(e){}
+  SYNC.save();home();
+}
+function logout(){localStorage.removeItem(SYNC.meKey);gate();}
+
+const examKey=e=>e.year+"-"+e.round;
+function findQ(k,no){const e=EXAMS.find(x=>examKey(x)===k);return e?e.questions.find(q=>q.no===no):null;}
+function allSubjects(){const s=new Set();EXAMS.forEach(e=>e.questions.forEach(q=>s.add(q.subject)));return[...s];}
+function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+/* ---------------- HOME ---------------- */
+function home(){
+  const st=LS.getStat(), wrong=LS.getWrong().length;
+  const totalQ=EXAMS.reduce((a,e)=>a+e.questions.length,0);
+  const acc=st.solved?Math.round(st.correct/st.solved*100):0;
+  const me=SYNC.me()||{};
+  app.innerHTML=`
+  <div class="card">
+    ${SYNC.on()?`<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13.5px">
+      <span>👤 <b>${esc(me.cls||"")} ${esc(me.name||"")}</b> <span id="syncdot" style="color:var(--muted);margin-left:6px">☁ 자동 저장</span></span>
+      <button class="back" style="margin:0" onclick="logout()">학습자 변경</button></div>`:""}
+    <div class="modes">
+      <div class="mode wide" onclick="startCBTpick()">
+        <div class="ic">📝</div><h3>CBT 모의고사</h3>
+        <p>실제 시험처럼 60문항·60분 타이머로 풀고 자동 채점. 틀린 문제는 오답노트에 자동 저장됩니다.</p>
+      </div>
+      <div class="mode wide" onclick="randomPick()">
+        <div class="ic">🎲</div><h3>유형별 랜덤 테스트</h3>
+        <p>과목(전기이론·전기기기·전기설비)과 문항 수를 골라, 24회차 전체에서 랜덤으로 뽑아 나만의 시험지로 채점.</p>
+      </div>
+      <div class="mode wide" onclick="weakPick()">
+        <div class="ic">🎯</div><h3>약점 집중 모드</h3>
+        <p>내 정답률·오답 통계를 분석해 <b>가장 약한 과목</b>과 <b>틀렸던 문제</b>를 우선 출제. 약점만 골라 집중 훈련합니다.</p>
+      </div>
+      <div class="mode" onclick="studyPick()">
+        <div class="ic">📚</div><h3>과목별 학습</h3>
+        <p>과목·연도별로 한 문제씩 풀며 바로 해설 확인.</p>
+      </div>
+      <div class="mode" onclick="wrongNote()">
+        <div class="ic">🔖</div><h3>오답노트</h3>
+        <p>틀린 문제만 모아 다시 풀기. <b>${wrong}</b>문제 저장됨.</p>
+      </div>
+    </div>
+    <div class="stat">
+      <div class="chip">보유 기출 <b>${EXAMS.length}</b>회차 · <b>${totalQ}</b>문항</div>
+      <div class="chip">누적 정답률 <b>${acc}%</b> (${st.correct}/${st.solved})</div>
+      <div class="chip">오답 <b>${wrong}</b>문제</div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- CBT ---------------- */
+function startCBTpick(){
+  const opts=EXAMS.map((e,i)=>`<option value="${i}">${e.title}</option>`).join("");
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">CBT 모의고사</span>
+    <h3 style="margin:10px 0 6px">회차 선택</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">60문항 · 제한시간 60분 · 60점 이상 합격</p>
+    <div class="row"><select id="exSel">${opts}</select></div>
+    <div class="navbtns"><span></span>
+      <button class="btn primary" onclick="startCBT(+$('#exSel').value)">시험 시작 ▶</button></div>
+  </div>`;
+}
+let CBT=null;
+function startCBT(idx){ startCBTexam(EXAMS[idx], true); }
+function startCBTexam(e, timed){
+  const dur=e.questions.length*60;          // 문항당 1분 (60문항→60분)
+  CBT={exam:e,i:0,ans:{},submitted:false,timed:!!timed,left:timed?dur:0,dur:dur,timer:null};
+  if(timed) CBT.timer=setInterval(()=>{CBT.left--;if(CBT.left<=0){clearInterval(CBT.timer);submitCBT()}else updateTimer();},1000);
+  renderCBT();
+}
+
+/* ---------------- 유형별 랜덤 테스트 ---------------- */
+function subjCounts(){
+  const c={},seen=new Set();
+  EXAMS.forEach(e=>e.questions.forEach(q=>{
+    const sig=(q.q||"").replace(/\s+/g,"")+"|"+q.answer;
+    if(seen.has(sig))return;seen.add(sig);
+    c[q.subject]=(c[q.subject]||0)+1;}));
+  return c;
+}
+function randomPick(){
+  const counts=subjCounts();
+  const subs=allSubjects();
+  const total=Object.values(counts).reduce((a,b)=>a+b,0);
+  const subBoxes=subs.map(s=>`<label class="rsub"><input type="checkbox" class="subChk" value="${esc(s)}" checked> ${esc(s)} <span style="color:var(--muted)">(${counts[s]||0})</span></label>`).join("");
+  const countOpts=[10,20,30,40,60,100].map(n=>`<option value="${n}"${n===20?" selected":""}>${n}문항</option>`).join("");
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">유형별 랜덤 테스트</span>
+    <h3 style="margin:10px 0 6px">나만의 시험지 만들기</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">과목과 문항 수를 고르면 24회차 전체(<b>${total}</b>문항)에서 랜덤으로 뽑아 채점합니다.</p>
+    <div style="font-size:13.5px;font-weight:700;margin-bottom:6px">출제 과목</div>
+    <div class="rsubs">${subBoxes}</div>
+    <div class="row" style="margin-top:14px;gap:14px">
+      <label>문항 수 <select id="rCount">${countOpts}</select></label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13.5px;color:#475569">
+        <input type="checkbox" id="rTimed" checked> 제한시간(문항당 1분)</label>
+    </div>
+    <div class="navbtns" style="margin-top:16px"><span></span>
+      <button class="btn primary" onclick="startRandom()">시험 시작 ▶</button></div>
+  </div>`;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const qsig=q=>(q.q||"").replace(/\s+/g,"")+"|"+q.answer;
+function packExam(pool,title,cfg){
+  const questions=pool.map((it,i)=>({...it.q,no:i+1,_k:it.k,_ono:it.q.no}));
+  return {year:0,round:0,custom:true,title,questions,_cfg:cfg};
+}
+function buildRandomExam(cfg){
+  let pool=[];const seen=new Set();
+  EXAMS.forEach(e=>{const k=examKey(e);e.questions.forEach(q=>{
+    if(cfg.subs.length&&!cfg.subs.includes(q.subject))return;
+    const sig=qsig(q);if(seen.has(sig))return;seen.add(sig);   // 회차 반복문제 중복 제거
+    pool.push({q,k});});});
+  shuffle(pool);pool=pool.slice(0,cfg.count);
+  const label=cfg.subs.length&&cfg.subs.length<allSubjects().length?cfg.subs.join("·"):"전체 과목";
+  return packExam(pool,`랜덤 테스트 · ${label} ${pool.length}문항`,cfg);
+}
+function startRandom(){
+  const subs=[...document.querySelectorAll(".subChk:checked")].map(x=>x.value);
+  if(!subs.length){alert("최소 한 과목을 선택하세요.");return;}
+  const count=+$("#rCount").value, timed=$("#rTimed").checked;
+  const exam=buildRandomExam({subs,count,timed,mode:"random"});
+  if(!exam.questions.length){alert("해당 조건의 문제가 없습니다.");return;}
+  startCBTexam(exam,timed);
+}
+/* ---------------- 약점 집중 모드 ---------------- */
+function weakStats(){
+  const s=LS.getStatSubj();const wc={};
+  LS.getWrong().forEach(x=>{const q=findQ(x.k,x.no);if(q)wc[q.subject]=(wc[q.subject]||0)+1;});
+  return allSubjects().map(subj=>{const d=s[subj]||{solved:0,correct:0};
+    return {subj,solved:d.solved,correct:d.correct,acc:d.solved?d.correct/d.solved:null,wrong:wc[subj]||0};});
+}
+function weakSubjectsAuto(stats){
+  const wd=stats.filter(x=>x.acc!=null);
+  if(!wd.length){const w=stats.filter(x=>x.wrong>0).map(x=>x.subj);return w.length?w:stats.map(x=>x.subj);}
+  const avg=wd.reduce((a,b)=>a+b.acc,0)/wd.length;
+  let weak=wd.filter(x=>x.acc<=avg+1e-9).map(x=>x.subj);
+  if(!weak.length)weak=[wd.slice().sort((a,b)=>a.acc-b.acc)[0].subj];
+  return weak;
+}
+function weakPick(){
+  const stats=weakStats();
+  const hasData=stats.some(x=>x.acc!=null)||LS.getWrong().length>0;
+  const auto=weakSubjectsAuto(stats);
+  const rows=stats.map(x=>{const acc=x.acc!=null?Math.round(x.acc*100):null;const isW=auto.includes(x.subj);
+    return `<label class="rsub"${isW?' style="border-color:#fca5a5;background:#fef2f2"':''}>
+      <input type="checkbox" class="wSub" value="${esc(x.subj)}" ${isW?'checked':''}>
+      <b>${esc(x.subj)}</b> <span style="color:var(--muted);font-size:12.5px">정답률 ${acc!=null?acc+'%':'–'} · 오답 ${x.wrong}</span></label>`;}).join("");
+  const countOpts=[10,20,30,40,60].map(n=>`<option value="${n}"${n===20?" selected":""}>${n}문항</option>`).join("");
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">약점 집중 모드</span>
+    <h3 style="margin:10px 0 6px">🎯 약점 분석</h3>
+    ${hasData
+      ?`<p style="color:var(--muted);font-size:13.5px;margin:0 0 12px">정답률이 낮은 과목(빨강)을 자동 선택했어요. <b>틀렸던 문제부터 우선</b> 출제하고, 부족하면 약점 과목에서 새 문제로 채웁니다.</p>`
+      :`<p style="color:var(--muted);font-size:13.5px;margin:0 0 12px">아직 학습 기록이 적어요. CBT·랜덤 테스트를 몇 번 풀면 더 정확히 분석됩니다. 지금은 선택한 과목에서 출제합니다.</p>`}
+    <div class="rsubs">${rows}</div>
+    <div class="row" style="margin-top:14px;gap:14px">
+      <label>문항 수 <select id="wCount">${countOpts}</select></label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13.5px;color:#475569">
+        <input type="checkbox" id="wTimed"> 제한시간(문항당 1분)</label>
+    </div>
+    <div class="navbtns" style="margin-top:16px"><span></span>
+      <button class="btn primary" onclick="startWeak()">약점 훈련 시작 ▶</button></div>
+  </div>`;
+}
+function buildWeakExam(cfg){
+  const seen=new Set();let pool=[];
+  const add=(q,k)=>{const s=qsig(q);if(seen.has(s))return;seen.add(s);pool.push({q,k});};
+  // 1) 틀렸던 문제(오답노트) 우선 — 선택 과목만
+  LS.getWrong().forEach(x=>{const q=findQ(x.k,x.no);if(q&&(!cfg.subs.length||cfg.subs.includes(q.subject)))add(q,x.k);});
+  // 2) 약점 과목의 새 문제로 채우기
+  let extra=[];EXAMS.forEach(e=>{const k=examKey(e);e.questions.forEach(q=>{
+    if(cfg.subs.length&&!cfg.subs.includes(q.subject))return;
+    if(seen.has(qsig(q)))return;extra.push({q,k});});});
+  shuffle(extra);
+  for(const it of extra){if(pool.length>=cfg.count)break;add(it.q,it.k);}
+  pool=pool.slice(0,cfg.count);shuffle(pool);
+  return packExam(pool,`약점 집중 · ${cfg.subs.join("·")} ${pool.length}문항`,cfg);
+}
+function startWeak(){
+  const subs=[...document.querySelectorAll(".wSub:checked")].map(x=>x.value);
+  if(!subs.length){alert("최소 한 과목을 선택하세요.");return;}
+  const count=+$("#wCount").value, timed=$("#wTimed").checked;
+  const exam=buildWeakExam({subs,count,timed,mode:"weak"});
+  if(!exam.questions.length){alert("출제할 문제가 없습니다.");return;}
+  startCBTexam(exam,timed);
+}
+function retryCBT(){
+  if(CBT.exam.custom){const cfg=CBT.exam._cfg;const ex=cfg.mode==="weak"?buildWeakExam(cfg):buildRandomExam(cfg);startCBTexam(ex,cfg.timed);}
+  else startCBT(EXAMS.indexOf(CBT.exam));
+}
+function updateTimer(){if(!CBT||!CBT.timed)return;const t=$("#timer");if(!t)return;const m=Math.floor(CBT.left/60),s=CBT.left%60;
+  t.textContent=`⏱ ${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;t.classList.toggle("warn",CBT.left<=300);}
+function renderCBT(){
+  const e=CBT.exam,q=e.questions[CBT.i];
+  const answered=Object.keys(CBT.ans).length;
+  app.innerHTML=`
+  <div class="row" style="justify-content:space-between;color:#fff;margin-bottom:8px">
+    <button class="back" onclick="quitCBT()">← 나가기</button>
+    ${CBT.timed?`<span class="timer" id="timer">⏱ --:--</span>`:`<span class="timer" style="background:#eef2ff;color:#3730a3;border-color:#c7d2fe">∞ 제한시간 없음</span>`}
+  </div>
+  <div class="card">
+    <div class="qhead"><span class="qno">문 ${q.no} / ${e.questions.length}</span><span class="qsubj">${esc(q.subject)}</span></div>
+    <div class="qtext">${esc(q.q)}</div>
+    ${q.img?`<img class="qimg" src="${q.img}" alt="문제 그림">`:""}
+    <div class="choices" id="choices"></div>
+    <div class="navbtns">
+      <button class="btn ghost" onclick="cbtGo(-1)" ${CBT.i===0?"disabled":""}>◀ 이전</button>
+      ${CBT.i===e.questions.length-1
+        ? `<button class="btn primary" onclick="submitCBT()">제출하기 (${answered}/${e.questions.length})</button>`
+        : `<button class="btn primary" onclick="cbtGo(1)">다음 ▶</button>`}
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="row" style="justify-content:space-between"><b style="font-size:13.5px">답안지 (OMR)</b>
+      <span style="font-size:12.5px;color:var(--muted)">${answered}/${e.questions.length} 완료</span></div>
+    <div class="omr" id="omr"></div>
+  </div>`;
+  const ch=$("#choices");
+  q.choices.forEach((c,k)=>{const n=k+1;const sel=CBT.ans[q.no]===n;
+    const d=document.createElement("div");d.className="choice"+(sel?" sel":"");
+    d.innerHTML=`<span class="num">${NUM[n]}</span><span>${q.choicesImg?"":esc(c)}</span>`;
+    d.onclick=()=>{CBT.ans[q.no]=n;renderCBT();};ch.appendChild(d);});
+  const omr=$("#omr");
+  e.questions.forEach((qq,k)=>{const b=document.createElement("button");b.textContent=qq.no;
+    if(CBT.ans[qq.no])b.classList.add("done");if(k===CBT.i)b.classList.add("cur");
+    b.onclick=()=>{CBT.i=k;renderCBT();};omr.appendChild(b);});
+  updateTimer();
+}
+function cbtGo(d){CBT.i=Math.min(CBT.exam.questions.length-1,Math.max(0,CBT.i+d));renderCBT();}
+function quitCBT(){if(confirm("시험을 종료하고 홈으로 이동할까요? (답안은 저장되지 않습니다)")){clearInterval(CBT.timer);CBT=null;home();}}
+function submitCBT(){
+  const un=CBT.exam.questions.length-Object.keys(CBT.ans).length;
+  if(un>0&&!(CBT.timed&&CBT.left<=0)&&!confirm(`아직 ${un}문제를 풀지 않았습니다. 제출할까요?`))return;
+  clearInterval(CBT.timer);CBT.submitted=true;
+  const e=CBT.exam,k=examKey(e);let correct=0;const wrongList=[];
+  e.questions.forEach(q=>{const a=CBT.ans[q.no];const ok=a===q.answer;
+    LS.addSubjResult(q.subject,ok);
+    if(ok)correct++;else{wrongList.push(q);LS.addWrong(e.custom?q._k:k, e.custom?q._ono:q.no);}});
+  const st=LS.getStat();st.solved+=e.questions.length;st.correct+=correct;st.exams+=1;LS.setStat(st);
+  const total=e.questions.length,score=Math.round(correct/total*100);
+  SYNC.result(e.title,score,correct,total);SYNC.save();
+  resultCBT(correct,wrongList);
+}
+function resultCBT(correct,wrongList){
+  const e=CBT.exam,total=e.questions.length;const score=Math.round(correct/total*100);
+  const pass=score>=60;const color=pass?"var(--ok)":"var(--no)";
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">${e.title} · 결과</span>
+    <div class="scorebig" style="color:${color};margin-top:10px">${score}점</div>
+    <div class="passbar"><div style="width:${score}%;background:${color}"></div></div>
+    <div class="result-note">${correct} / ${total} 정답 · <b style="color:${color}">${pass?"합격 🎉":"불합격 (60점 미만)"}</b></div>
+    ${(window.ResultCollector&&ResultCollector.config&&ResultCollector.config.endpoint)?`<button class="btn" style="width:100%;margin-top:14px;background:#16a34a;color:#fff" onclick="submitResult()">📤 선생님께 결과 제출</button>`:""}
+    <div class="navbtns" style="margin-top:12px">
+      <button class="btn ghost" onclick="retryCBT()">${CBT.exam.custom?"새 문제로 다시":"다시 풀기"}</button>
+      <button class="btn primary" onclick="reviewCBT()">틀린 문제 해설 (${wrongList.length})</button>
+    </div>
+  </div>`;
+  CBT._score=score;CBT._correct=correct;CBT._total=total;CBT._dur=CBT.timed?(CBT.dur-CBT.left):0;CBT._wrong=wrongList;
+}
+function submitResult(){
+  if(!(window.ResultCollector&&ResultCollector.config&&ResultCollector.config.endpoint)){
+    alert("결과 제출 링크로 접속했을 때만 제출할 수 있어요. (선생님이 배포한 링크를 사용하세요)");return;}
+  ResultCollector.open({
+    score:CBT._score, correct:CBT._correct, total:CBT._total,
+    wrong:(CBT._wrong||[]).map(q=>q.no), durationSec:CBT._dur
+  });
+}
+function reviewCBT(){
+  const list=CBT._wrong||[];
+  let html=`<button class="back" onclick="home()">← 홈</button><div class="card"><span class="pill">틀린 문제 해설</span>`;
+  if(!list.length)html+=`<div class="empty">틀린 문제가 없습니다. 완벽합니다! 🏆</div>`;
+  list.forEach(q=>{
+    const my=CBT.ans[q.no];
+    html+=`<div class="miniq">
+      <div class="qhead"><span class="qno">문 ${q.no}</span><span class="qsubj">${esc(q.subject)}</span></div>
+      <div class="qtext">${esc(q.q)}</div>
+      ${q.img?`<img class="qimg" src="${q.img}">`:""}
+      <div style="font-size:14px;line-height:1.7">
+        ${q.choices.map((c,k)=>{const n=k+1;let t=q.choicesImg?"":esc(c);
+          if(n===q.answer)return `<div class="tag-ok">${NUM[n]} ${t} ✔ 정답</div>`;
+          if(n===my)return `<div class="tag-no">${NUM[n]} ${t} ✘ 내 답</div>`;
+          return `<div style="color:#94a3b8">${NUM[n]} ${t}</div>`;}).join("")}
+      </div>
+      <div class="expl show"><b>해설</b> · ${esc(q.explain)}</div>
+    </div>`;
+  });
+  html+=`</div>`;app.innerHTML=html;
+}
+
+/* ---------------- 과목별 학습 ---------------- */
+let STUDY=null;
+function studyPick(){
+  const subs=allSubjects();
+  const subOpts=`<option value="__all">전체 과목</option>`+subs.map(s=>`<option value="${s}">${s}</option>`).join("");
+  const exOpts=`<option value="__all">전체 회차</option>`+EXAMS.map((e,i)=>`<option value="${i}">${e.title}</option>`).join("");
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">과목별 학습</span>
+    <h3 style="margin:10px 0 6px">범위 선택</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">한 문제씩 풀면 바로 정답·해설을 보여줍니다.</p>
+    <div class="row" style="margin-bottom:10px">과목 <select id="subSel">${subOpts}</select></div>
+    <div class="row">회차 <select id="exSel2">${exOpts}</select></div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;color:#475569">
+      <input type="checkbox" id="shuf"> 문제 순서 섞기</label>
+    <div class="navbtns"><span></span><button class="btn primary" onclick="startStudy()">시작 ▶</button></div>
+  </div>`;
+}
+function startStudy(){
+  const sub=$("#subSel").value, exv=$("#exSel2").value, shuf=$("#shuf").checked;
+  let qs=[];
+  EXAMS.forEach((e,i)=>{if(exv!=="__all"&&+exv!==i)return;
+    e.questions.forEach(q=>{if(sub!=="__all"&&q.subject!==sub)return;qs.push({...q,_k:examKey(e)});});});
+  if(shuf)for(let i=qs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[qs[i],qs[j]]=[qs[j],qs[i]];}
+  if(!qs.length){alert("해당 조건의 문제가 없습니다.");return;}
+  STUDY={qs,i:0,picked:null,label:(sub==="__all"?"전체":sub)};renderStudy();
+}
+function renderStudy(){
+  const q=STUDY.qs[STUDY.i],picked=STUDY.picked,done=picked!=null;
+  app.innerHTML=`
+  <button class="back" onclick="studyPick()">← 범위 변경</button>
+  <div class="card">
+    <div class="qhead"><span class="qno">${STUDY.i+1} / ${STUDY.qs.length}</span><span class="qsubj">${esc(q.subject)} · ${q._k}</span></div>
+    <div class="qtext">${esc(q.q)}</div>
+    ${q.img?`<img class="qimg" src="${q.img}">`:""}
+    <div class="choices" id="choices"></div>
+    <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${esc(q.explain)}</div>
+    <div class="navbtns">
+      <button class="btn ghost" onclick="studyGo(-1)" ${STUDY.i===0?"disabled":""}>◀ 이전</button>
+      <button class="btn primary" onclick="studyGo(1)" ${STUDY.i===STUDY.qs.length-1?"disabled":""}>다음 ▶</button>
+    </div>
+  </div>`;
+  const ch=$("#choices");
+  q.choices.forEach((c,k)=>{const n=k+1;const d=document.createElement("div");
+    let cls="choice";
+    if(done){cls+=" disabled";if(n===q.answer)cls+=" correct";else if(n===picked)cls+=" wrong";}
+    d.className=cls;d.innerHTML=`<span class="num">${NUM[n]}</span><span>${q.choicesImg?"":esc(c)}</span>`;
+    if(!done)d.onclick=()=>{STUDY.picked=n;const ok=n===q.answer;
+      const st=LS.getStat();st.solved++;if(ok)st.correct++;LS.setStat(st);LS.addSubjResult(q.subject,ok);
+      if(!ok)LS.addWrong(q._k,q.no);SYNC.saveSoon();renderStudy();};
+    ch.appendChild(d);});
+}
+function studyGo(d){const ni=STUDY.i+d;if(ni<0||ni>=STUDY.qs.length)return;STUDY.i=ni;STUDY.picked=null;renderStudy();}
+
+/* ---------------- 오답노트 ---------------- */
+let NOTE=null;
+function wrongNote(){
+  const w=LS.getWrong();
+  const qs=w.map(x=>{const q=findQ(x.k,x.no);return q?{...q,_k:x.k}:null;}).filter(Boolean);
+  if(!qs.length){
+    app.innerHTML=`<button class="back" onclick="home()">← 홈</button>
+    <div class="card"><span class="pill">오답노트</span>
+    <div class="empty">아직 저장된 오답이 없습니다.<br>CBT나 과목별 학습에서 틀린 문제가 자동으로 모입니다. 💪</div></div>`;return;}
+  NOTE={qs,i:0,picked:null};renderNote();
+}
+function renderNote(){
+  const q=NOTE.qs[NOTE.i],picked=NOTE.picked,done=picked!=null;
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <div class="qhead"><span class="qno">오답 ${NOTE.i+1} / ${NOTE.qs.length}</span><span class="qsubj">${esc(q.subject)} · ${q._k}</span></div>
+    <div class="qtext">${esc(q.q)}</div>
+    ${q.img?`<img class="qimg" src="${q.img}">`:""}
+    <div class="choices" id="choices"></div>
+    <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${esc(q.explain)}</div>
+    <div class="navbtns">
+      <button class="btn ghost" onclick="noteGo(-1)" ${NOTE.i===0?"disabled":""}>◀ 이전</button>
+      <button class="btn ghost" onclick="masterNote()">✓ 익힘(삭제)</button>
+      <button class="btn primary" onclick="noteGo(1)" ${NOTE.i===NOTE.qs.length-1?"disabled":""}>다음 ▶</button>
+    </div>
+  </div>`;
+  const ch=$("#choices");
+  q.choices.forEach((c,k)=>{const n=k+1;const d=document.createElement("div");
+    let cls="choice";if(done){cls+=" disabled";if(n===q.answer)cls+=" correct";else if(n===picked)cls+=" wrong";}
+    d.className=cls;d.innerHTML=`<span class="num">${NUM[n]}</span><span>${q.choicesImg?"":esc(c)}</span>`;
+    if(!done)d.onclick=()=>{NOTE.picked=n;renderNote();};ch.appendChild(d);});
+}
+function noteGo(d){const ni=NOTE.i+d;if(ni<0||ni>=NOTE.qs.length)return;NOTE.i=ni;NOTE.picked=null;renderNote();}
+function masterNote(){const q=NOTE.qs[NOTE.i];LS.removeWrong(q._k,q.no);SYNC.saveSoon();
+  NOTE.qs.splice(NOTE.i,1);if(!NOTE.qs.length){home();return;}
+  if(NOTE.i>=NOTE.qs.length)NOTE.i=NOTE.qs.length-1;NOTE.picked=null;renderNote();}
+
+/* boot */
+if(!EXAMS.length){app.innerHTML=`<div class="card"><div class="empty">문제 데이터를 불러오지 못했습니다.</div></div>`;}
+else if(SYNC.on()&&!SYNC.me()){gate();}
+else home();
+</script>
+<!-- 결과 수집 위젯:
+     · config.js의 resultEndpoint를 채우면 → 결과 화면에 [📤 결과 제출] 버튼이 항상 표시
+     · 비워두면 → 선생님이 만든 ?rc=<exec URL> 링크로 접속할 때만 제출 버튼 표시 -->
+<script>(function(){
+  var cfg=window.ELECEXAM_CONFIG||{};
+  var s=document.createElement('script');
+  s.src="https://hongyul67-cpu.github.io/links/collector.js";
+  s.setAttribute('data-tool','전기기능사 필기');
+  s.setAttribute('data-max-num','40');
+  if(cfg.resultEndpoint) s.setAttribute('data-endpoint',cfg.resultEndpoint);
+  document.body.appendChild(s);
+})();</script>
+</body>
+</html>
