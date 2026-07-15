@@ -9,6 +9,9 @@
 //  두 곳에 같은 /exec URL을 넣어도 됩니다(같은 시트로 모임, 탭만 다름).
 // ─────────────────────────────────────────────────────────────
 window.ELECEXAM_CONFIG = {
-  syncUrl: "https://script.google.com/macros/s/AKfycbx_3vHqONU7_rMHhgHqZ1Vqem6kd23SIyLLDplWn7DJbR_3V0ChVXanOjKg8fTQFIIvjg/exec",         // 예: "https://script.google.com/macros/s/AKfy..../exec"
+  // 링크에 ?rc=<본인 exec URL> 이 있으면 그 주소(교사별 시트)가 우선합니다.
+  // 없으면 아래 기본 주소로 갑니다. → 선생님마다 자기 시트로 이어하기가 분리돼요.
+  syncUrl: (function(){ try { return new URLSearchParams(location.search).get('rc') || ""; } catch(e){ return ""; } })()
+           || "https://script.google.com/macros/s/AKfycbx_3vHqONU7_rMHhgHqZ1Vqem6kd23SIyLLDplWn7DJbR_3V0ChVXanOjKg8fTQFIIvjg/exec",
   resultEndpoint: "https://script.google.com/macros/s/AKfycbx_3vHqONU7_rMHhgHqZ1Vqem6kd23SIyLLDplWn7DJbR_3V0ChVXanOjKg8fTQFIIvjg/exec"
 };
