@@ -9,6 +9,6 @@
 //  두 곳에 같은 /exec URL을 넣어도 됩니다(같은 시트로 모임, 탭만 다름).
 // ─────────────────────────────────────────────────────────────
 window.ELECEXAM_CONFIG = {
-  syncUrl: "",         // 예: "https://script.google.com/macros/s/AKfy..../exec"
-  resultEndpoint: "https://script.google.com/macros/s/AKfycbxcNlg5DKf6gbsmHqc-gFJ2acr4SWYz_7yIS-Af2CH-ZP_0RgWOYer4siEKQw_7YQ5mCQ/exec"
+  syncUrl: "https://script.google.com/macros/s/AKfycbx_3vHqONU7_rMHhgHqZ1Vqem6kd23SIyLLDplWn7DJbR_3V0ChVXanOjKg8fTQFIIvjg/exec",         // 예: "https://script.google.com/macros/s/AKfy..../exec"
+  resultEndpoint: "https://script.google.com/macros/s/AKfycbx_3vHqONU7_rMHhgHqZ1Vqem6kd23SIyLLDplWn7DJbR_3V0ChVXanOjKg8fTQFIIvjg/exec"
 };
