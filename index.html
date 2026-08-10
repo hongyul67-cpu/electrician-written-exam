@@ -126,11 +126,15 @@
 <script src="data/2020-3.js"></script>
 <script src="data/2020-2.js"></script>
 <script src="data/2020-1.js"></script>
+<script src="data/bank-500.js"></script>
+<script src="data/theory.js"></script>
 <script src="config.js"></script>
 <script>
 const $=(s,el=document)=>el.querySelector(s);
 const app=$("#app");
 const EXAMS=(window.EXAMS||[]).sort((a,b)=>(b.year-a.year)||(b.round-a.round));
+const ROUNDS=EXAMS.filter(e=>!e.bank);          // 실제 회차(CBT 모의고사용)
+const BANKS=EXAMS.filter(e=>e.bank);            // 반복기출 500제(과목별 3세트)
 const NUM=["","①","②","③","④","⑤"];
 const LS={
   wrongKey:"elecexam_wrong_v1", statKey:"elecexam_stat_v1",
@@ -232,6 +236,14 @@ function home(){
         <div class="ic">🎲</div><h3>유형별 랜덤 테스트</h3>
         <p>과목(전기이론·전기기기·전기설비)과 문항 수를 골라, 24회차 전체에서 랜덤으로 뽑아 나만의 시험지로 채점.</p>
       </div>
+      <div class="mode wide" onclick="theoryOpen()">
+        <div class="ic">📘</div><h3>핵심이론 요약</h3>
+        <p>공식·회로도·표를 한눈에. 시험에 꼭 나오는 <b>과목별 핵심이론</b>을 문제 풀기 전에 훑어보세요.</p>
+      </div>
+      <div class="mode wide" onclick="bankPick()">
+        <div class="ic">🔥</div><h3>반복기출 500제</h3>
+        <p>시험에 <b>빠지지 않고 반복 출제</b>되는 엄선 500문제. 과목별로 배우기(해설 바로 보기) 또는 시험 보기.</p>
+      </div>
       <div class="mode wide" onclick="weakPick()">
         <div class="ic">🎯</div><h3>약점 집중 모드</h3>
         <p>내 정답률·오답 통계를 분석해 <b>가장 약한 과목</b>과 <b>틀렸던 문제</b>를 우선 출제. 약점만 골라 집중 훈련합니다.</p>
@@ -246,7 +258,7 @@ function home(){
       </div>
     </div>
     <div class="stat">
-      <div class="chip">보유 기출 <b>${EXAMS.length}</b>회차 · <b>${totalQ}</b>문항</div>
+      <div class="chip">기출 <b>${ROUNDS.length}</b>회차 · <b>${ROUNDS.reduce((a,e)=>a+e.questions.length,0)}</b>문항 + 반복기출 <b>${BANKS.reduce((a,e)=>a+e.questions.length,0)}</b>제</div>
       <div class="chip">누적 정답률 <b>${acc}%</b> (${st.correct}/${st.solved})</div>
       <div class="chip">오답 <b>${wrong}</b>문제</div>
     </div>
@@ -255,7 +267,7 @@ function home(){
 
 /* ---------------- CBT ---------------- */
 function startCBTpick(){
-  const opts=EXAMS.map((e,i)=>`<option value="${i}">${e.title}</option>`).join("");
+  const opts=ROUNDS.map((e,i)=>`<option value="${i}">${e.title}</option>`).join("");
   app.innerHTML=`
   <button class="back" onclick="home()">← 홈</button>
   <div class="card">
@@ -268,7 +280,7 @@ function startCBTpick(){
   </div>`;
 }
 let CBT=null;
-function startCBT(idx){ startCBTexam(EXAMS[idx], true); }
+function startCBT(idx){ startCBTexam(ROUNDS[idx], true); }
 function startCBTexam(e, timed){
   const dur=e.questions.length*60;          // 문항당 1분 (60문항→60분)
   CBT={exam:e,i:0,ans:{},submitted:false,timed:!!timed,left:timed?dur:0,dur:dur,timer:null};
@@ -396,9 +408,100 @@ function startWeak(){
   if(!exam.questions.length){alert("출제할 문제가 없습니다.");return;}
   startCBTexam(exam,timed);
 }
+/* ---------------- 핵심이론 요약 ---------------- */
+let THEO=null;
+function theoryOpen(subj){
+  const T=window.THEORY||[];
+  if(!T.length){alert("핵심이론 자료를 불러오지 못했습니다.");return;}
+  const subs=[...new Set(T.map(x=>x.subject))];
+  const s=subj||(THEO&&THEO.subj)||subs[0];
+  const list=T.filter(x=>x.subject===s);
+  const i=(THEO&&THEO.subj===s)?Math.min(THEO.i,list.length-1):0;
+  THEO={subj:s,i,list};renderTheory();
+}
+function renderTheory(){
+  const subs=[...new Set((window.THEORY||[]).map(x=>x.subject))];
+  const p=THEO.list[THEO.i];
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">핵심이론 요약</span>
+    <div class="subjbar" style="margin-top:10px">
+      ${subs.map(s=>`<button class="${s===THEO.subj?'on':''}" onclick="theoryOpen('${esc(s)}')">${esc(s)}</button>`).join("")}
+    </div>
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <b style="font-size:14px">${esc(p.subject)}${p.topic?" · "+esc(p.topic):""}</b>
+      <span style="font-size:12.5px;color:var(--muted)">${THEO.i+1} / ${THEO.list.length}쪽</span>
+    </div>
+    <img class="qimg" style="margin-top:8px" src="${p.img}" alt="핵심이론 ${esc(p.subject)}">
+    <div class="navbtns">
+      <button class="btn ghost" onclick="theoryGo(-1)" ${THEO.i===0?"disabled":""}>◀ 이전</button>
+      <button class="btn primary" onclick="theoryGo(1)" ${THEO.i===THEO.list.length-1?"disabled":""}>다음 ▶</button>
+    </div>
+  </div>`;
+  window.scrollTo(0,0);
+}
+function theoryGo(d){const n=THEO.i+d;if(n<0||n>=THEO.list.length)return;THEO.i=n;renderTheory();}
+
+/* ---------------- 반복기출 500제 ---------------- */
+function bankQs(subj){
+  const qs=[];
+  BANKS.forEach(e=>{const k=examKey(e);e.questions.forEach(q=>{
+    if(subj==="__all"||q.subject===subj) qs.push({...q,_k:k});});});
+  return qs;
+}
+function bankPick(){
+  const counts={};BANKS.forEach(e=>e.questions.forEach(q=>{counts[q.subject]=(counts[q.subject]||0)+1;}));
+  const subs=Object.keys(counts);
+  const total=subs.reduce((a,s)=>a+counts[s],0);
+  const opts=`<option value="__all">전체 (${total}제)</option>`+
+    subs.map(s=>`<option value="${esc(s)}">${esc(s)} (${counts[s]}제)</option>`).join("");
+  const countOpts=[10,20,30,50,100].map(n=>`<option value="${n}"${n===20?" selected":""}>${n}문항</option>`).join("");
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">반복기출 500제</span>
+    <h3 style="margin:10px 0 6px">🔥 시험에 반복 출제되는 엄선 500제</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">기출을 분석해 <b>빠지지 않고 반복 출제되는 문제</b>만 모았습니다. 먼저 <b>배우기</b>로 해설과 함께 익히고, <b>시험 보기</b>로 확인하세요.</p>
+    <div class="row" style="margin-bottom:6px">과목 <select id="bSubj">${opts}</select></div>
+    <div class="navbtns" style="margin-top:14px">
+      <span></span>
+      <button class="btn primary" style="background:#0891b2" onclick="bankLearn()">📖 배우기 (해설 보며 순서대로)</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b style="font-size:14px">📝 시험 보기</b>
+    <p style="color:var(--muted);font-size:13px;margin:6px 0 12px">위에서 고른 과목에서 랜덤으로 뽑아 채점합니다.</p>
+    <div class="row" style="gap:14px">
+      <label>문항 수 <select id="bCount">${countOpts}</select></label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13.5px;color:#475569">
+        <input type="checkbox" id="bTimed"> 제한시간(문항당 1분)</label>
+      <button class="btn primary" onclick="bankTest()">시험 시작 ▶</button>
+    </div>
+  </div>`;
+}
+function bankLearn(){
+  const subj=$("#bSubj").value, qs=bankQs(subj);
+  if(!qs.length){alert("해당 과목의 문제가 없습니다.");return;}
+  STUDY={qs,i:0,picked:null,label:"반복기출 500제",back:"bankPick"};renderStudy();
+}
+function buildBankExam(cfg){
+  let pool=bankQs(cfg.subj).map(q=>({q,k:q._k}));
+  shuffle(pool);pool=pool.slice(0,cfg.count);
+  const label=cfg.subj==="__all"?"전체":cfg.subj;
+  return packExam(pool,`반복기출 500제 · ${label} ${pool.length}문항`,cfg);
+}
+function bankTest(){
+  const cfg={subj:$("#bSubj").value,count:+$("#bCount").value,timed:$("#bTimed").checked,mode:"bank"};
+  const exam=buildBankExam(cfg);
+  if(!exam.questions.length){alert("출제할 문제가 없습니다.");return;}
+  startCBTexam(exam,cfg.timed);
+}
 function retryCBT(){
-  if(CBT.exam.custom){const cfg=CBT.exam._cfg;const ex=cfg.mode==="weak"?buildWeakExam(cfg):buildRandomExam(cfg);startCBTexam(ex,cfg.timed);}
-  else startCBT(EXAMS.indexOf(CBT.exam));
+  if(CBT.exam.custom){const cfg=CBT.exam._cfg;
+    const ex=cfg.mode==="weak"?buildWeakExam(cfg):cfg.mode==="bank"?buildBankExam(cfg):buildRandomExam(cfg);
+    startCBTexam(ex,cfg.timed);}
+  else startCBT(ROUNDS.indexOf(CBT.exam));
 }
 function updateTimer(){if(!CBT||!CBT.timed)return;const t=$("#timer");if(!t)return;const m=Math.floor(CBT.left/60),s=CBT.left%60;
   t.textContent=`⏱ ${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;t.classList.toggle("warn",CBT.left<=300);}
@@ -532,7 +635,7 @@ function startStudy(){
 function renderStudy(){
   const q=STUDY.qs[STUDY.i],picked=STUDY.picked,done=picked!=null;
   app.innerHTML=`
-  <button class="back" onclick="studyPick()">← 범위 변경</button>
+  <button class="back" onclick="${STUDY.back||'studyPick'}()">← 범위 변경</button>
   <div class="card">
     <div class="qhead"><span class="qno">${STUDY.i+1} / ${STUDY.qs.length}</span><span class="qsubj">${esc(q.subject)} · ${q._k}</span></div>
     <div class="qtext">${esc(q.q)}</div>
