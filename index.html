@@ -43,6 +43,26 @@
   .subjbar{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px}
   .subjbar button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-size:13px;cursor:pointer;font-family:inherit;color:#475569}
   .subjbar button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  /* 이론 이미지 확대 뷰어 */
+  .zoomov{position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;flex-direction:column}
+  .zoombar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#1e293b;color:#e2e8f0;font-size:13.5px}
+  .zoombar button{border:0;border-radius:8px;padding:8px 12px;font-size:14px;font-weight:700;cursor:pointer;
+    background:#334155;color:#e2e8f0;font-family:inherit}
+  .zoombar button.close{margin-left:auto;background:var(--brand);color:#fff}
+  .zoomwrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:#fff}
+  .zoomwrap img{display:block;width:100%;height:auto}
+  .zoomhint{font-size:12px;color:#94a3b8}
+  .tapzoom{cursor:zoom-in}
+  /* 출제기준 항목 */
+  .crit{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-top:9px;background:#fff}
+  .crit.weak{border-color:#fca5a5;background:#fef2f2}
+  .crit .ctop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .crit h4{margin:0;font-size:14.5px}
+  .crit .csub{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:5px;word-break:keep-all}
+  .crit .cmeta{font-size:12px;color:#475569;white-space:nowrap}
+  .crit .cbtn{border:0;border-radius:9px;padding:7px 11px;font-size:12.5px;font-weight:700;cursor:pointer;
+    background:var(--brand);color:#fff;font-family:inherit;margin-top:9px}
+  .crit .cbtn.ghost{background:var(--soft);color:#334155;margin-left:6px}
   .rsubs{display:flex;flex-wrap:wrap;gap:8px}
   .rsub{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;cursor:pointer;background:#fff}
   .rsub input{cursor:pointer}
@@ -147,7 +167,12 @@ const LS={
   subjKey:"elecexam_statsubj_v1",
   getStatSubj(){try{return JSON.parse(localStorage.getItem(this.subjKey))||{}}catch(e){return{}}},
   setStatSubj(s){localStorage.setItem(this.subjKey,JSON.stringify(s))},
-  addSubjResult(subj,ok){const s=this.getStatSubj();if(!s[subj])s[subj]={solved:0,correct:0};s[subj].solved++;if(ok)s[subj].correct++;this.setStatSubj(s);}
+  addSubjResult(subj,ok){const s=this.getStatSubj();if(!s[subj])s[subj]={solved:0,correct:0};s[subj].solved++;if(ok)s[subj].correct++;this.setStatSubj(s);},
+  topicKey:"elecexam_stattopic_v1",
+  getStatTopic(){try{return JSON.parse(localStorage.getItem(this.topicKey))||{}}catch(e){return{}}},
+  setStatTopic(s){localStorage.setItem(this.topicKey,JSON.stringify(s))},
+  addTopicResult(topic,ok){if(!topic)return;const s=this.getStatTopic();
+    if(!s[topic])s[topic]={solved:0,correct:0};s[topic].solved++;if(ok)s[topic].correct++;this.setStatTopic(s);}
 };
 
 /* ---------------- 클라우드 동기화 (Google 시트 / Apps Script) ---------------- */
@@ -243,6 +268,10 @@ function home(){
       <div class="mode wide" onclick="bankPick()">
         <div class="ic">🔥</div><h3>반복기출 500제</h3>
         <p>시험에 <b>빠지지 않고 반복 출제</b>되는 엄선 500문제. 과목별로 배우기(해설 바로 보기) 또는 시험 보기.</p>
+      </div>
+      <div class="mode wide" onclick="criteriaOpen()">
+        <div class="ic">📋</div><h3>출제기준 항목별 학습</h3>
+        <p>공단 <b>출제기준 20개 항목</b>으로 문제를 분류. 항목별 정답률을 보고 <b>약한 항목만</b> 골라 배우기·시험.</p>
       </div>
       <div class="mode wide" onclick="weakPick()">
         <div class="ic">🎯</div><h3>약점 집중 모드</h3>
@@ -408,6 +437,112 @@ function startWeak(){
   if(!exam.questions.length){alert("출제할 문제가 없습니다.");return;}
   startCBTexam(exam,timed);
 }
+/* ---------------- 출제기준 20개 항목 (한국산업인력공단) ---------------- */
+const CRITERIA=[
+ {n:1,name:"전기의 성질과 전하에 의한 전기장",sub:"전기의 본질 · 정전기의 성질 및 특수현상 · 콘덴서(커패시터) · 전기장과 전위",
+  kw:["전하","전기장","전계","전위","정전","콘덴서","커패시터","유전율","유전체","쿨롱","대전","전기력선","정전용량","전기량","전자의 수","분극"]},
+ {n:2,name:"자기의 성질과 전류에 의한 자기장",sub:"자석에 의한 자기현상 · 전류에 의한 자기현상 · 자기회로",
+  kw:["자석","자기","자속","자계","자장","자기회로","기자력","자기저항","투자율","비오","앙페르","자화","히스테리시스","솔레노이드","자극","자성체","자기력"]},
+ {n:3,name:"전자력과 전자유도",sub:"전자력 · 전자유도",
+  kw:["전자력","전자유도","플레밍","렌츠","패러데이의 법칙","유도기전력","인덕턴스","상호","와전류","기전력의 방향"]},
+ {n:4,name:"직류회로",sub:"전압과 전류 · 전기저항",
+  kw:["옴의 법칙","키르히호프","합성저항","전기저항","전압강하","분류기","배율기","직렬","병렬","브리지","도전율","고유저항","저항값","휘트스톤","배수"]},
+ {n:5,name:"교류회로",sub:"정현파 교류회로 · 3상 교류회로 · 비정현파 교류회로",
+  kw:["교류","정현파","실효값","평균값","역률","임피던스","리액턴스","공진","3상","Y결선","△결선","델타","비정현파","고조파","위상","주파수","각속도","파형률","파고율","피상","무효"]},
+ {n:6,name:"전류의 열작용과 화학작용",sub:"전류의 열작용 · 전류의 화학작용",
+  kw:["줄의 법칙","열량","전력량","발열","전기분해","전지","축전지","전해","국부작용","제백","펠티에","톰슨","전열기","건전지","방전","충전","패러데이 법칙"]},
+ {n:7,name:"변압기",sub:"구조와 원리 · 이론 및 특성 · 결선 · 병렬운전 · 시험 및 보수",
+  kw:["변압기","권수비","변압비","1차 전압","2차 전압","V결선","변압기유","부흐홀츠","여자전류","철손","동손","단락시험","무부하시험","탭"]},
+ {n:8,name:"직류기",sub:"원리와 구조 · 직류발전기 · 직류전동기 · 이론 및 용도 · 시험법",
+  kw:["직류기","직류발전기","직류전동기","전기자","계자","정류자","브러시","분권","직권","복권","타여자","전기자 반작용","보극","정류 개선","속도변동률"]},
+ {n:9,name:"유도전동기",sub:"원리와 구조 · 속도제어 및 용도",
+  kw:["유도전동기","유도기","슬립","회전자","농형","권선형","2차 저항","비례추이","기동보상기","Y-△ 기동","단상 유도","반발 기동","분상 기동","2차 효율","동기와트"]},
+ {n:10,name:"동기기",sub:"원리와 구조 · 동기발전기 이론 및 특성 · 병렬운전 · 동기전동기 운전",
+  kw:["동기기","동기발전기","동기전동기","동기속도","단락비","난조","제동권선","동기 임피던스","동기 리액턴스","자기여자","위상특성","V곡선","전기자 권선법"]},
+ {n:11,name:"정류기 및 제어기기",sub:"정류용 반도체 소자 · 정류회로 특성 · 제어정류기 · 사이리스터 응용 · 제어장치",
+  kw:["정류","SCR","사이리스터","다이오드","TRIAC","트라이액","GTO","트랜지스터","인버터","컨버터","초퍼","위상제어","반도체","맥동","평활","점호","소호","UJT","다이악","브리지 정류","전력변환"]},
+ {n:12,name:"보호계전기",sub:"보호계전기의 종류 및 특성",
+  kw:["계전기","계전방식","ZCT","OCR","변류기","계기용","비율차동","차동계전","지락","과전류계전","보호계전"]},
+ {n:13,name:"배선재료 및 공구",sub:"전선 및 케이블 · 배선재료 · 전기설비 관련 공구",
+  kw:["전선의 종류","케이블","공구","펜치","커터","스트리퍼","드라이브 이트","오스터","녹아웃","리머","와이어 게이지","절연전선","코드","경동선","연동선","약호","파이프 바이스","클리퍼","홀소","벤더","플라이어"]},
+ {n:14,name:"전선접속",sub:"피복 벗기기 · 각종 접속방법 · 기구단자와의 접속",
+  kw:["전선접속","접속방법","슬리브","커넥터","압착","트위스트","브리타니아","테이프","납땜","단자","접속점","와이어 커넥터","링형","쥐꼬리"]},
+ {n:15,name:"배선설비공사 및 전선허용전류",sub:"전선관·트렁킹·덕팅·트레이 시스템 · 케이블공사 · 저압/특고압 옥내배선 · 전선허용전류",
+  kw:["금속관","합성수지관","가요전선관","덕트","케이블트레이","몰드","옥내배선","케이블공사","허용전류","애자사용","라이팅덕트","버스덕트","플로어덕트","지지점","관 상호","박스","커플링","전선관","가요","배선공사"]},
+ {n:16,name:"전선 및 기계기구의 보안공사",sub:"전선로 보안 · 과전류차단기 · 기기 설치 및 보안 · 접지공사 · 피뢰설비",
+  kw:["과전류차단기","누전차단기","접지","접지공사","접지선","피뢰","보안공사","절연저항","절연내력","개폐기","퓨즈","차단기","누전","접지저항","보호도체","감전"]},
+ {n:17,name:"가공인입선 및 배전선 공사",sub:"가공인입선 · 배전선로 재료와 기구 · 장주/건주/가선 · 주상기기 설치",
+  kw:["가공인입선","지지물","전주","완금","지지선","지선","장주","건주","가선","주상","COS","경간","지지물 간 거리","이도","배전선로","가공전선","애자","랙","암타이","발판 볼트"]},
+ {n:18,name:"고압 및 저압 배전반 공사",sub:"배전반 공사 · 분전반 공사",
+  kw:["배전반","분전반","수전설비","큐비클","모선","수변전","간선","분기회로","계기 부착"]},
+ {n:19,name:"특수장소 공사",sub:"먼지/위험물/가연성·부식성 가스 · 흥행장·광산 등 위험장소",
+  kw:["먼지","분진","위험물","가연성","폭연성","부식성","흥행장","광산","화약류","특수장소","방폭","셀룰로이드","위험 장소"]},
+ {n:20,name:"전기응용시설 공사",sub:"조명배선 · 동력배선 · 제어배선 · 신호배선 · 전기응용기기 설치",
+  kw:["조명","광속","조도","광도","램프","형광등","백열","점멸기","3로","동력배선","제어배선","신호배선","콘센트","전기응용","네온","전기울타리","엘리베이터","심벌","도면 기호","배선용 그림기호"]}
+];
+function topicOf(q){
+  const t=(q.q||"")+" "+(q.choices||[]).join(" ")+" "+(q.explain||"");
+  let best=null,bs=0;
+  for(const c of CRITERIA){
+    let s=0;for(const k of c.kw){if(t.indexOf(k)>=0)s++;}
+    if(s>bs){bs=s;best=c.name;}
+  }
+  return bs>0?best:null;
+}
+let TOPICIDX=null;
+function topicIndex(){
+  if(TOPICIDX)return TOPICIDX;
+  const idx={};CRITERIA.forEach(c=>idx[c.name]=[]);
+  const seen=new Set();
+  EXAMS.forEach(e=>{const k=examKey(e);e.questions.forEach(q=>{
+    const sig=qsig(q);if(seen.has(sig))return;seen.add(sig);
+    const t=topicOf(q);if(t)idx[t].push({q,k});});});
+  TOPICIDX=idx;return idx;
+}
+function criteriaOpen(){
+  const idx=topicIndex(),st=LS.getStatTopic();
+  const accs=CRITERIA.map(c=>{const d=st[c.name];return d&&d.solved?d.correct/d.solved:null;}).filter(x=>x!=null);
+  const avg=accs.length?accs.reduce((a,b)=>a+b,0)/accs.length:null;
+  const rows=CRITERIA.map(c=>{
+    const n=(idx[c.name]||[]).length,d=st[c.name]||{solved:0,correct:0};
+    const acc=d.solved?Math.round(d.correct/d.solved*100):null;
+    const weak=acc!=null&&avg!=null&&(acc/100)<=avg+1e-9&&d.solved>=3;
+    return `<div class="crit${weak?' weak':''}">
+      <div class="ctop"><h4>${c.n}. ${esc(c.name)}</h4>
+        <span class="cmeta">${n}문항${acc!=null?` · 정답률 <b>${acc}%</b>`:''}${weak?' 🔻':''}</span></div>
+      <div class="csub">${esc(c.sub)}</div>
+      <button class="cbtn" onclick="topicTest('${esc(c.name)}')" ${n?'':'disabled'}>📝 이 항목 시험 (${Math.min(n,20)}문항)</button>
+      <button class="cbtn ghost" onclick="topicLearn('${esc(c.name)}')" ${n?'':'disabled'}>📖 배우기</button>
+    </div>`;}).join("");
+  const totalMatched=CRITERIA.reduce((a,c)=>a+(idx[c.name]||[]).length,0);
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">출제기준 항목별 학습</span>
+    <h3 style="margin:10px 0 6px">📋 출제기준 20개 항목</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 4px">한국산업인력공단 출제기준입니다. 보유 문제 <b>${totalMatched}</b>개를 항목별로 자동 분류했어요.
+    풀어본 항목은 정답률이 표시되고, <b style="color:var(--no)">평균 이하 항목은 빨강 🔻</b>으로 나타납니다.</p>
+    ${rows}
+  </div>`;
+  window.scrollTo(0,0);
+}
+function topicPool(name){return (topicIndex()[name]||[]).slice();}
+function buildTopicExam(cfg){
+  let pool=topicPool(cfg.topic);shuffle(pool);pool=pool.slice(0,cfg.count);
+  return packExam(pool,`출제기준 · ${cfg.topic} ${pool.length}문항`,cfg);
+}
+function topicTest(name){
+  const cfg={topic:name,count:20,timed:false,mode:"topic"};
+  const exam=buildTopicExam(cfg);
+  if(!exam.questions.length){alert("이 항목에 해당하는 문제가 없습니다.");return;}
+  startCBTexam(exam,false);
+}
+function topicLearn(name){
+  const qs=topicPool(name).map(it=>({...it.q,_k:it.k}));
+  if(!qs.length){alert("이 항목에 해당하는 문제가 없습니다.");return;}
+  STUDY={qs,i:0,picked:null,label:name,back:"criteriaOpen"};renderStudy();
+}
+
 /* ---------------- 핵심이론 요약 ---------------- */
 let THEO=null;
 function theoryOpen(subj){
@@ -419,9 +554,18 @@ function theoryOpen(subj){
   const i=(THEO&&THEO.subj===s)?Math.min(THEO.i,list.length-1):0;
   THEO={subj:s,i,list};renderTheory();
 }
+// 이론 주제 → 출제기준 항목 (관련 문제 바로 풀기용)
+const THEORY2CRIT={
+ "직류회로":"직류회로","정전계":"전기의 성질과 전하에 의한 전기장","정자계":"자기의 성질과 전류에 의한 자기장",
+ "교류회로":"교류회로","직류기":"직류기","동기기":"동기기","변압기":"변압기","유도기":"유도전동기",
+ "정류기":"정류기 및 제어기기","배선재료·공구":"배선재료 및 공구","전선식별·접속":"전선접속",
+ "금속관공사":"배선설비공사 및 전선허용전류","배선설비공사":"배선설비공사 및 전선허용전류",
+ "보안공사·접지":"전선 및 기계기구의 보안공사","가공인입·배전":"가공인입선 및 배전선 공사"};
 function renderTheory(){
   const subs=[...new Set((window.THEORY||[]).map(x=>x.subject))];
   const p=THEO.list[THEO.i];
+  const crit=THEORY2CRIT[p.topic]||null;
+  const cnt=crit?(topicIndex()[crit]||[]).length:0;
   app.innerHTML=`
   <button class="back" onclick="home()">← 홈</button>
   <div class="card">
@@ -431,9 +575,12 @@ function renderTheory(){
     </div>
     <div class="row" style="justify-content:space-between;align-items:center">
       <b style="font-size:14px">${esc(p.subject)}${p.topic?" · "+esc(p.topic):""}</b>
-      <span style="font-size:12.5px;color:var(--muted)">${THEO.i+1} / ${THEO.list.length}쪽</span>
+      <span style="font-size:12.5px;color:var(--muted)">${THEO.i+1} / ${THEO.list.length}쪽 · 🔍 눌러서 확대</span>
     </div>
-    <img class="qimg" style="margin-top:8px" src="${p.img}" alt="핵심이론 ${esc(p.subject)}">
+    <img class="qimg tapzoom" style="margin-top:8px" src="${p.img}" alt="핵심이론 ${esc(p.subject)}"
+         onclick="imgZoom('${p.img}')">
+    ${crit&&cnt?`<button class="btn" style="width:100%;margin-top:10px;background:#0891b2;color:#fff"
+         onclick="topicLearn('${esc(crit)}')">🔥 이 주제 문제 풀어보기 · ${esc(crit)} (${cnt}문항)</button>`:""}
     <div class="navbtns">
       <button class="btn ghost" onclick="theoryGo(-1)" ${THEO.i===0?"disabled":""}>◀ 이전</button>
       <button class="btn primary" onclick="theoryGo(1)" ${THEO.i===THEO.list.length-1?"disabled":""}>다음 ▶</button>
@@ -442,6 +589,31 @@ function renderTheory(){
   window.scrollTo(0,0);
 }
 function theoryGo(d){const n=THEO.i+d;if(n<0||n>=THEO.list.length)return;THEO.i=n;renderTheory();}
+
+/* ---------------- 이미지 확대 뷰어 (핀치줌 + 버튼 확대) ---------------- */
+let ZOOMLV=1;
+function imgZoom(src){
+  ZOOMLV=1;
+  const ov=document.createElement("div");ov.className="zoomov";ov.id="zoomov";
+  ov.innerHTML=`
+    <div class="zoombar">
+      <button onclick="zoomStep(-1)">➖ 축소</button>
+      <button onclick="zoomStep(1)">➕ 확대</button>
+      <span id="zoomlv">100%</span>
+      <span class="zoomhint">· 두 손가락으로도 확대돼요</span>
+      <button class="close" onclick="closeZoom()">✕ 닫기</button>
+    </div>
+    <div class="zoomwrap" id="zoomwrap"><img id="zoomimg" src="${src}" alt="확대 보기"></div>`;
+  document.body.appendChild(ov);
+  document.body.style.overflow="hidden";
+}
+function zoomStep(d){
+  ZOOMLV=Math.min(4,Math.max(1,+(ZOOMLV+d*0.5).toFixed(1)));
+  const im=$("#zoomimg"),lv=$("#zoomlv");
+  if(im)im.style.width=(ZOOMLV*100)+"%";
+  if(lv)lv.textContent=Math.round(ZOOMLV*100)+"%";
+}
+function closeZoom(){const ov=$("#zoomov");if(ov)ov.remove();document.body.style.overflow="";}
 
 /* ---------------- 반복기출 500제 ---------------- */
 function bankQs(subj){
@@ -499,7 +671,8 @@ function bankTest(){
 }
 function retryCBT(){
   if(CBT.exam.custom){const cfg=CBT.exam._cfg;
-    const ex=cfg.mode==="weak"?buildWeakExam(cfg):cfg.mode==="bank"?buildBankExam(cfg):buildRandomExam(cfg);
+    const ex=cfg.mode==="weak"?buildWeakExam(cfg):cfg.mode==="bank"?buildBankExam(cfg)
+            :cfg.mode==="topic"?buildTopicExam(cfg):buildRandomExam(cfg);
     startCBTexam(ex,cfg.timed);}
   else startCBT(ROUNDS.indexOf(CBT.exam));
 }
@@ -549,7 +722,7 @@ function submitCBT(){
   clearInterval(CBT.timer);CBT.submitted=true;
   const e=CBT.exam,k=examKey(e);let correct=0;const wrongList=[];
   e.questions.forEach(q=>{const a=CBT.ans[q.no];const ok=a===q.answer;
-    LS.addSubjResult(q.subject,ok);
+    LS.addSubjResult(q.subject,ok);LS.addTopicResult(topicOf(q),ok);
     if(ok)correct++;else{wrongList.push(q);LS.addWrong(e.custom?q._k:k, e.custom?q._ono:q.no);}});
   const st=LS.getStat();st.solved+=e.questions.length;st.correct+=correct;st.exams+=1;LS.setStat(st);
   const total=e.questions.length,score=Math.round(correct/total*100);
@@ -653,7 +826,8 @@ function renderStudy(){
     if(done){cls+=" disabled";if(n===q.answer)cls+=" correct";else if(n===picked)cls+=" wrong";}
     d.className=cls;d.innerHTML=`<span class="num">${NUM[n]}</span><span>${q.choicesImg?"":esc(c)}</span>`;
     if(!done)d.onclick=()=>{STUDY.picked=n;const ok=n===q.answer;
-      const st=LS.getStat();st.solved++;if(ok)st.correct++;LS.setStat(st);LS.addSubjResult(q.subject,ok);
+      const st=LS.getStat();st.solved++;if(ok)st.correct++;LS.setStat(st);
+      LS.addSubjResult(q.subject,ok);LS.addTopicResult(topicOf(q),ok);
       if(!ok)LS.addWrong(q._k,q.no);SYNC.saveSoon();renderStudy();};
     ch.appendChild(d);});
 }
