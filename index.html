@@ -53,6 +53,34 @@
   .zoomwrap img{display:block;width:100%;height:auto}
   .zoomhint{font-size:12px;color:#94a3b8}
   .tapzoom{cursor:zoom-in}
+  /* 수업(칠판) 모드 — 프로젝터용 큰 글씨 */
+  .big .qtext{font-size:27px;line-height:1.55;font-weight:700}
+  .big .choice{font-size:23px;padding:16px 18px;border-width:2px}
+  .big .choice .num{font-size:25px}
+  .big .qno{font-size:19px}
+  .big .qsubj{font-size:15px}
+  .big .expl{font-size:19px;line-height:1.7}
+  .big .qimg{max-height:46vh;object-fit:contain}
+  .clsbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .clsbar .btn{padding:11px 15px;font-size:15px}
+  .cnt{font-weight:900;font-size:22px;color:#b45309;background:#fff7ed;border:2px solid #fed7aa;
+    border-radius:12px;padding:6px 14px;min-width:78px;text-align:center}
+  .cnt.go{color:#b91c1c;background:#fee2e2;border-color:#fecaca}
+  .pickov{position:fixed;inset:0;background:rgba(15,23,42,.92);z-index:9999;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+  .pickov .pnum{font-size:23vw;font-weight:900;line-height:1;letter-spacing:-4px}
+  .pickov .plab{font-size:20px;color:#c7d2fe;margin-bottom:10px}
+  .pickov .phint{font-size:15px;color:#94a3b8;margin-top:26px}
+  /* 함께 풀기 */
+  .steps{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .steps .btn{padding:10px 13px;font-size:14px}
+  .choice.gone{opacity:.32;text-decoration:line-through;pointer-events:none}
+  .scorebar{display:flex;gap:10px;align-items:center;font-size:13px;color:#475569;margin-top:10px;flex-wrap:wrap}
+  .scorebar b{color:var(--brand);font-size:15px}
+  .hintbox{margin-top:11px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:12px;
+    padding:11px 13px;font-size:14px;line-height:1.65;color:#155e75}
+  .prog{height:9px;border-radius:999px;background:#e2e8f0;overflow:hidden;margin-top:10px}
+  .prog>div{height:100%;background:var(--brand);border-radius:999px;transition:width .25s}
   /* 출제기준 항목 */
   .crit{border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-top:9px;background:#fff}
   .crit.weak{border-color:#fca5a5;background:#fef2f2}
@@ -268,6 +296,14 @@ function home(){
       <div class="mode wide" onclick="bankPick()">
         <div class="ic">🔥</div><h3>반복기출 500제</h3>
         <p>시험에 <b>빠지지 않고 반복 출제</b>되는 엄선 500문제. 과목별로 배우기(해설 바로 보기) 또는 시험 보기.</p>
+      </div>
+      <div class="mode wide" onclick="togPick()">
+        <div class="ic">🤝</div><h3>함께 풀기</h3>
+        <p>한 문제씩 같이 풀어요. 막히면 <b>💡힌트(관련 이론 보기)</b>·<b>✂오답 지우기</b>를 쓰고, 도움 없이 맞히면 점수가 더 높아요.</p>
+      </div>
+      <div class="mode wide" onclick="classPick()" style="border-color:#fcd34d;background:#fffbeb">
+        <div class="ic">🏫</div><h3>수업 모드 <span style="font-size:11.5px;color:#b45309">교사용</span></h3>
+        <p>프로젝터에 <b>큰 글씨</b>로 문제를 띄우고 함께 풀이. 생각시간 타이머 · 정답 공개 · <b>학생 번호 뽑기</b> · 단축키 지원.</p>
       </div>
       <div class="mode wide" onclick="criteriaOpen()">
         <div class="ic">📋</div><h3>출제기준 항목별 학습</h3>
@@ -541,6 +577,274 @@ function topicLearn(name){
   const qs=topicPool(name).map(it=>({...it.q,_k:it.k}));
   if(!qs.length){alert("이 항목에 해당하는 문제가 없습니다.");return;}
   STUDY={qs,i:0,picked:null,label:name,back:"criteriaOpen"};renderStudy();
+}
+
+/* ---------------- 공용: 문제 범위 선택 ---------------- */
+function scopeOptions(){
+  const idx=topicIndex();
+  let h=`<option value="__all">전체 (기출 + 500제)</option>`;
+  h+=`<optgroup label="과목">`+allSubjects().map(s=>`<option value="subj:${esc(s)}">${esc(s)}</option>`).join("")+`</optgroup>`;
+  h+=`<optgroup label="출제기준 항목">`+CRITERIA.map(c=>{const n=(idx[c.name]||[]).length;
+      return n?`<option value="crit:${esc(c.name)}">${c.n}. ${esc(c.name)} (${n})</option>`:"";}).join("")+`</optgroup>`;
+  h+=`<optgroup label="반복기출 500제">`+BANKS.map(e=>`<option value="bank:${examKey(e)}">${esc(e.title)}</option>`).join("")+`</optgroup>`;
+  h+=`<optgroup label="기출 회차">`+ROUNDS.map((e,i)=>`<option value="round:${i}">${esc(e.title)}</option>`).join("")+`</optgroup>`;
+  return h;
+}
+function scopePool(scope){
+  if(scope.indexOf("crit:")===0) return topicPool(scope.slice(5));
+  if(scope.indexOf("round:")===0){const e=ROUNDS[+scope.slice(6)];const k=examKey(e);return e.questions.map(q=>({q,k}));}
+  if(scope.indexOf("bank:")===0){const e=EXAMS.find(x=>examKey(x)===scope.slice(5));if(!e)return[];const k=examKey(e);return e.questions.map(q=>({q,k}));}
+  const sub=scope.indexOf("subj:")===0?scope.slice(5):null;
+  const seen=new Set(),out=[];
+  EXAMS.forEach(e=>{const k=examKey(e);e.questions.forEach(q=>{
+    if(sub&&q.subject!==sub)return;
+    const sig=qsig(q);if(seen.has(sig))return;seen.add(sig);
+    out.push({q,k});});});
+  return out;
+}
+function scopeLabel(s){
+  if(s==="__all")return "전체";
+  if(s.indexOf("subj:")===0||s.indexOf("crit:")===0)return s.slice(5);
+  if(s.indexOf("round:")===0)return ROUNDS[+s.slice(6)].title;
+  if(s.indexOf("bank:")===0){const e=EXAMS.find(x=>examKey(x)===s.slice(5));return e?e.title:"500제";}
+  return "전체";
+}
+let CRIT2THEORY=null;   // THEORY2CRIT 는 아래(핵심이론 절)에서 선언되므로 지연 생성
+function critTheoryMap(){
+  if(CRIT2THEORY)return CRIT2THEORY;
+  CRIT2THEORY={};Object.keys(THEORY2CRIT).forEach(t=>{
+    if(!CRIT2THEORY[THEORY2CRIT[t]])CRIT2THEORY[THEORY2CRIT[t]]=t;});
+  return CRIT2THEORY;
+}
+function theoryPageFor(critName){
+  const t=critTheoryMap()[critName];if(!t)return null;
+  return (window.THEORY||[]).find(p=>p.topic===t)||null;
+}
+
+/* ---------------- 🏫 수업 모드 (교실 화면용) ---------------- */
+let CLS=null;
+function classPick(){
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">수업 모드</span>
+    <h3 style="margin:10px 0 6px">🏫 수업용 문제 풀이 (칠판·프로젝터)</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">문제를 <b>큰 글씨</b>로 띄우고 학생들과 함께 풉니다.
+      생각할 시간 타이머, 정답 공개, 해설, <b>학생 번호 뽑기</b>까지 한 화면에서.</p>
+    <div class="row" style="margin-bottom:10px">범위 <select id="cScope" style="flex:1">${scopeOptions()}</select></div>
+    <div class="row" style="gap:14px">
+      <label>문항 수 <select id="cCount">
+        ${[5,10,15,20,30].map(n=>`<option value="${n}"${n===10?" selected":""}>${n}문항</option>`).join("")}</select></label>
+      <label>생각시간 <select id="cSecs">
+        ${[0,15,20,30,45,60].map(n=>`<option value="${n}"${n===30?" selected":""}>${n?n+"초":"없음"}</option>`).join("")}</select></label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13.5px;color:#475569">
+        <input type="checkbox" id="cShuf" checked> 순서 섞기</label>
+    </div>
+    <div class="navbtns" style="margin-top:16px"><span></span>
+      <button class="btn primary" onclick="classStart()">수업 시작 ▶</button></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b style="font-size:13.5px">⌨ 단축키</b>
+    <p style="color:var(--muted);font-size:13px;margin:6px 0 0;line-height:1.7">
+      <b>Space / →</b> 다음 문제 · <b>Enter</b> 정답 공개 · <b>←</b> 이전 · <b>T</b> 타이머 · <b>P</b> 학생 뽑기</p>
+  </div>`;
+}
+function classStart(){
+  const scope=$("#cScope").value,n=+$("#cCount").value,secs=+$("#cSecs").value,shuf=$("#cShuf").checked;
+  let pool=scopePool(scope);if(shuf)shuffle(pool);pool=pool.slice(0,n);
+  if(!pool.length){alert("해당 범위에 문제가 없습니다.");return;}
+  CLS={qs:pool.map(it=>({...it.q,_k:it.k})),i:0,pick:null,revealed:false,
+       secs,left:secs,timer:null,label:scopeLabel(scope)};
+  renderClass();
+}
+function classStopTimer(){if(CLS&&CLS.timer){clearInterval(CLS.timer);CLS.timer=null;}}
+function classTimer(){
+  if(!CLS)return;
+  if(CLS.timer){classStopTimer();renderClass();return;}
+  if(!CLS.secs){alert("생각시간이 '없음'으로 설정되어 있어요.");return;}
+  CLS.left=CLS.secs;
+  CLS.timer=setInterval(()=>{CLS.left--;const el=$("#clstimer");
+    if(el){el.textContent=CLS.left+"초";el.classList.toggle("go",CLS.left<=5);}
+    if(CLS.left<=0){classStopTimer();classReveal();}},1000);
+  renderClass();
+}
+function renderClass(){
+  const q=CLS.qs[CLS.i],rev=CLS.revealed;
+  app.innerHTML=`
+  <div class="row" style="justify-content:space-between;color:#fff;margin-bottom:8px">
+    <button class="back" onclick="classQuit()">← 나가기</button>
+    <span style="font-size:13px;color:#fde68a">🏫 수업 모드 · ${esc(CLS.label)}</span>
+  </div>
+  <div class="card big" id="classview">
+    <div class="qhead"><span class="qno">문 ${CLS.i+1} / ${CLS.qs.length}</span>
+      <span class="qsubj">${esc(q.subject)} · ${esc(q._k)}</span></div>
+    <div class="qtext">${esc(q.q)}</div>
+    ${q.img?`<img class="qimg tapzoom" src="${q.img}" onclick="imgZoom('${q.img}')" alt="문제 그림">`:""}
+    <div class="choices" id="choices"></div>
+    ${rev?`<div class="expl show"><b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b><b>해설</b> · ${esc(q.explain)}</div>`:""}
+    <div class="clsbar">
+      <button class="btn ghost" onclick="classGo(-1)" ${CLS.i===0?"disabled":""}>◀ 이전</button>
+      ${CLS.secs?`<button class="btn ghost" onclick="classTimer()">${CLS.timer?"⏸ 멈춤":"⏱ 시작"}</button>
+        <span class="cnt${CLS.left<=5&&CLS.timer?" go":""}" id="clstimer">${CLS.left}초</span>`:""}
+      <button class="btn primary" onclick="classReveal()" ${rev?"disabled":""}>✅ 정답 공개</button>
+      <button class="btn" style="background:#7c3aed;color:#fff" onclick="pickStudent()">🎲 학생 뽑기</button>
+      <button class="btn primary" onclick="classGo(1)" ${CLS.i===CLS.qs.length-1?"disabled":""}>다음 ▶</button>
+    </div>
+    <div class="prog"><div style="width:${Math.round((CLS.i+1)/CLS.qs.length*100)}%"></div></div>
+  </div>`;
+  const ch=$("#choices");
+  q.choices.forEach((c,k)=>{const n=k+1;const d=document.createElement("div");
+    let cls="choice";
+    if(rev){cls+=" disabled";if(n===q.answer)cls+=" correct";else if(n===CLS.pick)cls+=" wrong";}
+    else if(CLS.pick===n)cls+=" sel";
+    d.className=cls;
+    d.innerHTML=`<span class="num">${NUM[n]}</span><span>${q.choicesImg?"":esc(c)}</span>`;
+    if(!rev)d.onclick=()=>{CLS.pick=CLS.pick===n?null:n;renderClass();};
+    ch.appendChild(d);});
+  window.scrollTo(0,0);
+}
+function classReveal(){if(!CLS||CLS.revealed)return;classStopTimer();CLS.revealed=true;renderClass();}
+function classGo(d){
+  const n=CLS.i+d;if(n<0||n>=CLS.qs.length)return;
+  classStopTimer();CLS.i=n;CLS.pick=null;CLS.revealed=false;CLS.left=CLS.secs;renderClass();}
+function classQuit(){classStopTimer();CLS=null;home();}
+function pickStudent(){
+  const max=(window.ELECEXAM_CONFIG&&window.ELECEXAM_CONFIG.classSize)||30;
+  const ov=document.createElement("div");ov.className="pickov";ov.id="pickov";
+  ov.innerHTML=`<div class="plab">오늘의 발표자는…</div><div class="pnum" id="pnum">?</div>
+    <div class="phint">화면을 누르면 닫혀요 · 1~${max}번</div>`;
+  ov.onclick=()=>ov.remove();
+  document.body.appendChild(ov);
+  let t=0;const iv=setInterval(()=>{
+    const el=$("#pnum");if(!el){clearInterval(iv);return;}
+    el.textContent=1+Math.floor(Math.random()*max);t++;
+    if(t>18){clearInterval(iv);}
+  },70);
+}
+document.addEventListener("keydown",e=>{
+  if(!$("#classview")||!CLS)return;
+  if(e.key===" "||e.key==="ArrowRight"){e.preventDefault();classGo(1);}
+  else if(e.key==="ArrowLeft"){e.preventDefault();classGo(-1);}
+  else if(e.key==="Enter"){e.preventDefault();classReveal();}
+  else if(e.key==="t"||e.key==="T"){classTimer();}
+  else if(e.key==="p"||e.key==="P"){pickStudent();}
+});
+
+/* ---------------- 🤝 함께 풀기 (단계별 힌트) ---------------- */
+let TOG=null;
+function togPick(){
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">함께 풀기</span>
+    <h3 style="margin:10px 0 6px">🤝 힌트 받으며 한 문제씩 같이 풀기</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">막히면 <b>💡 힌트</b>(관련 이론 보기)와 <b>✂ 오답 2개 지우기</b>를 쓸 수 있어요.
+      도움 없이 맞히면 <b>3점</b>, 힌트·소거를 쓰면 점수가 줄어듭니다.</p>
+    <div class="row" style="margin-bottom:10px">범위 <select id="tScope" style="flex:1">${scopeOptions()}</select></div>
+    <div class="row" style="gap:14px">
+      <label>문항 수 <select id="tCount">
+        ${[5,10,15,20,30].map(n=>`<option value="${n}"${n===10?" selected":""}>${n}문항</option>`).join("")}</select></label>
+    </div>
+    <div class="navbtns" style="margin-top:16px"><span></span>
+      <button class="btn primary" onclick="togStart()">함께 풀기 시작 ▶</button></div>
+  </div>`;
+}
+function togStart(){
+  const scope=$("#tScope").value,n=+$("#tCount").value;
+  let pool=scopePool(scope);shuffle(pool);pool=pool.slice(0,n);
+  if(!pool.length){alert("해당 범위에 문제가 없습니다.");return;}
+  TOG={qs:pool.map(it=>({...it.q,_k:it.k})),i:0,score:0,max:0,used:{},picked:null,msg:"",label:scopeLabel(scope)};
+  renderTog();
+}
+function togUsed(){TOG.used[TOG.i]=TOG.used[TOG.i]||{hint:false,cut:false,shown:false,cutSet:null};return TOG.used[TOG.i];}
+function renderTog(){
+  const q=TOG.qs[TOG.i],u=togUsed(),done=TOG.picked!=null||u.shown;
+  const crit=topicOf(q),tp=crit?theoryPageFor(crit):null;
+  const usedCnt=(u.hint?1:0)+(u.cut?1:0);
+  const pts=u.shown?0:Math.max(1,3-usedCnt);
+  app.innerHTML=`
+  <button class="back" onclick="togPick()">← 범위 변경</button>
+  <div class="card">
+    <div class="qhead"><span class="qno">${TOG.i+1} / ${TOG.qs.length}</span>
+      <span class="qsubj">${esc(q.subject)} · ${esc(q._k)}</span></div>
+    <div class="qtext">${esc(q.q)}</div>
+    ${q.img?`<img class="qimg tapzoom" src="${q.img}" onclick="imgZoom('${q.img}')" alt="문제 그림">`:""}
+    <div class="choices" id="choices"></div>
+    ${u.hint?`<div class="hintbox">💡 <b>힌트</b> · 이 문제는 출제기준 <b>${esc(crit||"-")}</b> 항목입니다.
+        ${tp?`<br><button class="btn" style="margin-top:8px;background:#0891b2;color:#fff;padding:8px 12px;font-size:13.5px"
+            onclick="imgZoom('${tp.img}')">📘 관련 핵심이론 보기 (${esc(tp.subject)} · ${esc(tp.topic)})</button>`:""}</div>`:""}
+    ${done?`<div class="expl show"><b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b><b>해설</b> · ${esc(q.explain)}</div>`:""}
+    ${TOG.msg?`<div style="margin-top:10px;font-size:16px;font-weight:800;text-align:center">${TOG.msg}</div>`:""}
+    <div class="steps">
+      <button class="btn ghost" onclick="togHint()" ${u.hint||done?"disabled":""}>💡 힌트 (-1점)</button>
+      <button class="btn ghost" onclick="togCut()" ${u.cut||done?"disabled":""}>✂ 오답 2개 지우기 (-1점)</button>
+      <button class="btn ghost" onclick="togShow()" ${done?"disabled":""}>✅ 정답 보기 (0점)</button>
+    </div>
+    <div class="scorebar">
+      <span>점수 <b>${TOG.score}</b>점</span><span>·</span>
+      <span>이 문제 배점 <b>${done?0:pts}</b>점</span><span>·</span>
+      <span>${TOG.i+1}/${TOG.qs.length}문제</span>
+    </div>
+    <div class="prog"><div style="width:${Math.round((TOG.i+1)/TOG.qs.length*100)}%"></div></div>
+    <div class="navbtns">
+      <button class="btn ghost" onclick="togGo(-1)" ${TOG.i===0?"disabled":""}>◀ 이전</button>
+      ${TOG.i===TOG.qs.length-1
+        ?`<button class="btn primary" onclick="togEnd()">결과 보기 🏁</button>`
+        :`<button class="btn primary" onclick="togGo(1)">다음 ▶</button>`}
+    </div>
+  </div>`;
+  const ch=$("#choices");
+  q.choices.forEach((c,k)=>{const n=k+1;const d=document.createElement("div");
+    let cls="choice";
+    if(u.cutSet&&u.cutSet.indexOf(n)>=0)cls+=" gone";
+    if(done){cls+=" disabled";if(n===q.answer)cls+=" correct";else if(n===TOG.picked)cls+=" wrong";}
+    d.className=cls;
+    d.innerHTML=`<span class="num">${NUM[n]}</span><span>${q.choicesImg?"":esc(c)}</span>`;
+    if(!done)d.onclick=()=>togAnswer(n);
+    ch.appendChild(d);});
+  window.scrollTo(0,0);
+}
+function togAnswer(n){
+  const q=TOG.qs[TOG.i],u=togUsed();
+  if(TOG.picked!=null||u.shown)return;
+  TOG.picked=n;
+  const ok=n===q.answer;
+  const pts=ok?Math.max(1,3-((u.hint?1:0)+(u.cut?1:0))):0;
+  if(ok)TOG.score+=pts;
+  TOG.max+=3;
+  TOG.msg=ok?`🎉 정답! <span style="color:var(--ok)">+${pts}점</span>`:`❌ 아쉬워요 · 정답은 ${NUM[q.answer]}번`;
+  const st=LS.getStat();st.solved++;if(ok)st.correct++;LS.setStat(st);
+  LS.addSubjResult(q.subject,ok);LS.addTopicResult(topicOf(q),ok);
+  if(!ok)LS.addWrong(q._k,q.no);
+  SYNC.saveSoon();renderTog();
+}
+function togHint(){togUsed().hint=true;renderTog();}
+function togCut(){
+  const q=TOG.qs[TOG.i],u=togUsed();
+  const wrong=[1,2,3,4].filter(n=>n!==q.answer);shuffle(wrong);
+  u.cut=true;u.cutSet=wrong.slice(0,2);renderTog();
+}
+function togShow(){const u=togUsed();u.shown=true;TOG.max+=3;TOG.msg="";renderTog();}
+function togGo(d){
+  const n=TOG.i+d;if(n<0||n>=TOG.qs.length)return;
+  TOG.i=n;TOG.picked=null;TOG.msg="";renderTog();
+}
+function togEnd(){
+  const rate=TOG.max?Math.round(TOG.score/TOG.max*100):0;
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">함께 풀기 · 결과</span>
+    <div class="scorebig" style="color:var(--brand);margin-top:10px">${TOG.score}점</div>
+    <div class="result-note">만점 ${TOG.max}점 중 <b>${rate}%</b> · ${TOG.qs.length}문제</div>
+    <div class="passbar"><div style="width:${rate}%;background:var(--brand)"></div></div>
+    <p style="text-align:center;color:var(--muted);font-size:13.5px;margin-top:10px">
+      ${rate>=80?"훌륭해요! 힌트 없이도 잘 풀었어요 👏":rate>=50?"좋아요! 틀린 문제는 오답노트에 담겼어요 💪":"천천히 이론부터 다시 보면 금방 올라가요 📘"}</p>
+    <div class="navbtns" style="margin-top:12px">
+      <button class="btn ghost" onclick="togPick()">다른 범위로</button>
+      <button class="btn primary" onclick="wrongNote()">오답노트 보기</button>
+    </div>
+  </div>`;
 }
 
 /* ---------------- 핵심이론 요약 ---------------- */
