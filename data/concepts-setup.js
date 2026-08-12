@@ -12,26 +12,26 @@ window.CONCEPTS.push(
   <circle cx="40" cy="84" r="17" fill="#fff" stroke="#1e293b" stroke-width="3"/>
   <path d="M32 84 q4 -7 8 0 q4 7 8 0" fill="none" stroke="#1e293b" stroke-width="2.5"/>
   <text x="12" y="120" font-size="12.5" fill="#64748b">전원</text>
-  <path d="M40 46 V67" stroke="#1e293b" stroke-width="3"/>
-  <path d="M40 101 V132" stroke="#1e293b" stroke-width="3"/>
-  <path d="M40 132 H100" stroke="#1e293b" stroke-width="3"/>
-  <path d="M40 46 H198" stroke="#1e293b" stroke-width="3"/>
+  <path d="M40 46 V67" stroke="#1e293b" stroke-width="3" fill="none"/>
+  <path d="M40 101 V132" stroke="#1e293b" stroke-width="3" fill="none"/>
+  <path d="M40 132 H100" stroke="#1e293b" stroke-width="3" fill="none"/>
+  <path d="M40 46 H198" stroke="#1e293b" stroke-width="3" fill="none"/>
   <circle cx="220" cy="46" r="21" fill="#fef9c3" stroke="#d97706" stroke-width="3"/>
-  <path d="M211 37 l18 18 M229 37 l-18 18" stroke="#d97706" stroke-width="2.5"/>
+  <path d="M211 37 l18 18 M229 37 l-18 18" stroke="#d97706" stroke-width="2.5" fill="none"/>
   <text x="220" y="20" font-size="12.5" text-anchor="middle" fill="#92400e">전등</text>
   <path d="M241 46 H404 V132 H348" fill="none" stroke="#1e293b" stroke-width="3"/>
   <circle cx="100" cy="132" r="5.5" fill="#1e293b"/>
-  <path d="M100 132 L148 110" stroke="#dc2626" stroke-width="3.5"/>
+  <path d="M100 132 L148 110" stroke="#dc2626" stroke-width="3.5" fill="none"/>
   <circle cx="152" cy="110" r="5.5" fill="#1e293b"/>
   <circle cx="152" cy="154" r="5.5" fill="#1e293b"/>
   <text x="120" y="186" font-size="12.5" text-anchor="middle" fill="#dc2626">3로 스위치 S1</text>
   <circle cx="344" cy="132" r="5.5" fill="#1e293b"/>
-  <path d="M344 132 L296 110" stroke="#dc2626" stroke-width="3.5"/>
+  <path d="M344 132 L296 110" stroke="#dc2626" stroke-width="3.5" fill="none"/>
   <circle cx="292" cy="110" r="5.5" fill="#1e293b"/>
   <circle cx="292" cy="154" r="5.5" fill="#1e293b"/>
   <text x="322" y="186" font-size="12.5" text-anchor="middle" fill="#dc2626">3로 스위치 S2</text>
-  <path d="M158 110 H286" stroke="#0891b2" stroke-width="3"/>
-  <path d="M158 154 H286" stroke="#0891b2" stroke-width="3"/>
+  <path d="M158 110 H286" stroke="#0891b2" stroke-width="3" fill="none"/>
+  <path d="M158 154 H286" stroke="#0891b2" stroke-width="3" fill="none"/>
   <text x="222" y="100" font-size="12" text-anchor="middle" fill="#0891b2">여행선(트래블러) 2본</text>
   <text x="222" y="212" font-size="13" text-anchor="middle" fill="#166534">지금은 위쪽 여행선으로 연결 → 전등 ON</text>
  </svg>`},
@@ -46,20 +46,20 @@ window.CONCEPTS.push(
   <rect x="60" y="40" width="120" height="90" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="3"/>
   <text x="120" y="82" font-size="14" font-weight="700" text-anchor="middle" fill="#334155">전기기기</text>
   <text x="120" y="104" font-size="12" text-anchor="middle" fill="#64748b">(금속 외함)</text>
-  <path d="M120 130 V186" stroke="#16a34a" stroke-width="5"/>
+  <path d="M120 130 V186" stroke="#16a34a" stroke-width="5" fill="none"/>
   <text x="136" y="164" font-size="13" font-weight="700" fill="#16a34a">접지선(녹색)</text>
   <path d="M20 186 H420" fill="none" stroke="#a16207" stroke-width="4"/>
   <rect x="20" y="190" width="400" height="34" fill="#fef3c7"/>
   <text x="380" y="212" font-size="12.5" fill="#a16207">대지</text>
-  <path d="M100 200 H140 M106 210 H134 M112 220 H128" stroke="#16a34a" stroke-width="4"/>
+  <path d="M100 200 H140 M106 210 H134 M112 220 H128" stroke="#16a34a" stroke-width="4" fill="none"/>
   <text x="120" y="176" font-size="11.5" text-anchor="middle" fill="#166534">접지극</text>
-  <path d="M180 70 H250" stroke="#dc2626" stroke-width="3" stroke-dasharray="6 4"/>
+  <path d="M180 70 H250" stroke="#dc2626" stroke-width="3" stroke-dasharray="6 4" fill="none"/>
   <text x="292" y="66" font-size="12.5" fill="#dc2626">누전 전류가</text>
   <text x="292" y="84" font-size="12.5" fill="#dc2626">사람 대신 땅으로!</text>
   <g transform="translate(300,110)">
     <circle cx="20" cy="20" r="17" fill="#fff" stroke="#334155" stroke-width="2.5"/>
     <text x="20" y="26" font-size="15" text-anchor="middle">🧍</text>
-    <path d="M4 4 l32 32 M36 4 l-32 32" stroke="#16a34a" stroke-width="3"/>
+    <path d="M4 4 l32 32 M36 4 l-32 32" stroke="#16a34a" stroke-width="3" fill="none"/>
     <text x="20" y="58" font-size="11.5" text-anchor="middle" fill="#166534">감전 예방</text>
   </g>
  </svg>`},
@@ -135,25 +135,25 @@ window.CONCEPTS.push(
       "지지선(지선)은 소선 3가닥 이상을 꼬아서 사용"],
  svg:`<svg viewBox="0 0 440 250" xmlns="http://www.w3.org/2000/svg">
   <rect width="440" height="250" fill="#fff"/>
-  <path d="M20 210 H420" stroke="#a16207" stroke-width="4"/>
+  <path d="M20 210 H420" stroke="#a16207" stroke-width="4" fill="none"/>
   <rect x="20" y="214" width="400" height="34" fill="#fef3c7"/>
   <rect x="196" y="30" width="16" height="180" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>
-  <path d="M204 210 V244" stroke="#94a3b8" stroke-width="6" stroke-dasharray="5 4"/>
+  <path d="M204 210 V244" stroke="#94a3b8" stroke-width="6" stroke-dasharray="5 4" fill="none"/>
   <text x="228" y="240" font-size="11.5" fill="#a16207">매설 1.2m (7m 전주)</text>
-  <path d="M140 56 H268" stroke="#475569" stroke-width="7"/>
+  <path d="M140 56 H268" stroke="#475569" stroke-width="7" fill="none"/>
   <text x="112" y="52" font-size="12" fill="#64748b">완금</text>
   <g fill="#e0f2fe" stroke="#0891b2" stroke-width="2.5">
     <circle cx="152" cy="46" r="7"/><circle cx="204" cy="46" r="7"/><circle cx="256" cy="46" r="7"/>
   </g>
   <text x="296" y="32" font-size="12" fill="#155e75">애자</text>
-  <path d="M20 40 H152 M256 40 H420" stroke="#1e293b" stroke-width="2.5"/>
-  <path d="M204 120 L104 208" stroke="#d97706" stroke-width="4"/>
+  <path d="M20 40 H152 M256 40 H420" stroke="#1e293b" stroke-width="2.5" fill="none"/>
+  <path d="M204 120 L104 208" stroke="#d97706" stroke-width="4" fill="none"/>
   <text x="30" y="172" font-size="12" font-weight="700" fill="#92400e">지지선(지선)</text>
   <text x="30" y="190" font-size="11" fill="#92400e">3조 이상</text>
-  <path d="M212 168 h14 M212 180 h14 M212 192 h14" stroke="#dc2626" stroke-width="3.5"/>
+  <path d="M212 168 h14 M212 180 h14 M212 192 h14" stroke="#dc2626" stroke-width="3.5" fill="none"/>
   <text x="234" y="184" font-size="11.5" fill="#dc2626">발판 볼트</text>
-  <path d="M300 168 V210" stroke="#166534" stroke-width="2"/>
-  <path d="M296 168 h8 M296 210 h8" stroke="#166534" stroke-width="2"/>
+  <path d="M300 168 V210" stroke="#166534" stroke-width="2" fill="none"/>
+  <path d="M296 168 h8 M296 210 h8" stroke="#166534" stroke-width="2" fill="none"/>
   <text x="310" y="192" font-size="11.5" fill="#166534">1.8m 이상</text>
  </svg>`},
 
@@ -165,12 +165,12 @@ window.CONCEPTS.push(
  svg:`<svg viewBox="0 0 440 230" xmlns="http://www.w3.org/2000/svg">
   <rect width="440" height="230" fill="#fff"/>
   <text x="20" y="26" font-size="13" font-weight="700" fill="#1e293b">트위스트 접속 (가는 선)</text>
-  <path d="M20 56 H150" stroke="#b45309" stroke-width="4"/>
-  <path d="M290 56 H420" stroke="#b45309" stroke-width="4"/>
+  <path d="M20 56 H150" stroke="#b45309" stroke-width="4" fill="none"/>
+  <path d="M290 56 H420" stroke="#b45309" stroke-width="4" fill="none"/>
   <path d="M150 56 q12 -12 24 0 t24 0 t24 0 t24 0 t24 0" fill="none" stroke="#b45309" stroke-width="4"/>
   <path d="M150 56 q12 12 24 0 t24 0 t24 0 t24 0 t24 0" fill="none" stroke="#d97706" stroke-width="4"/>
   <text x="20" y="112" font-size="13" font-weight="700" fill="#1e293b">브리타니아 접속 (굵은 선)</text>
-  <path d="M20 142 H170 M270 142 H420" stroke="#b45309" stroke-width="6"/>
+  <path d="M20 142 H170 M270 142 H420" stroke="#b45309" stroke-width="6" fill="none"/>
   <rect x="170" y="136" width="100" height="12" fill="#fcd34d" stroke="#b45309" stroke-width="2"/>
   <g stroke="#334155" stroke-width="2.4">
     <path d="M180 130 v24 M196 130 v24 M212 130 v24 M228 130 v24 M244 130 v24 M260 130 v24"/>
@@ -178,8 +178,8 @@ window.CONCEPTS.push(
   <text x="220" y="124" font-size="11.5" text-anchor="middle" fill="#64748b">첨선 + 조인선으로 감기</text>
   <text x="20" y="196" font-size="13" font-weight="700" fill="#1e293b">쥐꼬리 접속 (박스 안 종단)</text>
   <rect x="300" y="168" width="60" height="50" rx="4" fill="#f1f5f9" stroke="#475569" stroke-width="2.5"/>
-  <path d="M240 194 H316" stroke="#b45309" stroke-width="4"/>
-  <path d="M240 206 H316" stroke="#d97706" stroke-width="4"/>
+  <path d="M240 194 H316" stroke="#b45309" stroke-width="4" fill="none"/>
+  <path d="M240 206 H316" stroke="#d97706" stroke-width="4" fill="none"/>
   <path d="M316 194 q10 6 0 12 q-10 -6 0 -12" fill="none" stroke="#334155" stroke-width="3"/>
   <text x="330" y="164" font-size="11.5" text-anchor="middle" fill="#64748b">박스</text>
  </svg>`},
@@ -219,7 +219,7 @@ window.CONCEPTS.push(
   <text x="220" y="24" font-size="13" text-anchor="middle" fill="#64748b">분전반</text>
   <rect x="140" y="50" width="70" height="34" rx="4" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/>
   <text x="175" y="72" font-size="12" font-weight="700" text-anchor="middle" fill="#dc2626">주 차단기</text>
-  <path d="M60 67 H140" stroke="#1e293b" stroke-width="4"/>
+  <path d="M60 67 H140" stroke="#1e293b" stroke-width="4" fill="none"/>
   <text x="66" y="56" font-size="12" fill="#64748b">간선 인입</text>
   <path d="M175 84 V104 H290" fill="none" stroke="#1e293b" stroke-width="3"/>
   <g>
@@ -230,7 +230,7 @@ window.CONCEPTS.push(
     <rect x="262" y="118" width="46" height="26" rx="3" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
     <text x="285" y="136" font-size="11" font-weight="700" text-anchor="middle" fill="#334155">MCCB</text>
   </g>
-  <path d="M173 144 V190 M229 144 V190 M285 144 V190" stroke="#1e293b" stroke-width="2.5"/>
+  <path d="M173 144 V190 M229 144 V190 M285 144 V190" stroke="#1e293b" stroke-width="2.5" fill="none"/>
   <text x="173" y="208" font-size="11.5" text-anchor="middle" fill="#64748b">콘센트</text>
   <text x="229" y="208" font-size="11.5" text-anchor="middle" fill="#64748b">조명</text>
   <text x="285" y="208" font-size="11.5" text-anchor="middle" fill="#64748b">동력</text>

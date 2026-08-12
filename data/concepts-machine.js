@@ -17,15 +17,15 @@ window.CONCEPTS.push(
   <text x="287" y="42" font-size="12.5" text-anchor="middle" fill="#64748b">계자</text>
   <circle cx="175" cy="110" r="58" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
   <circle cx="175" cy="110" r="20" fill="#fff" stroke="#1e293b" stroke-width="2.5"/>
-  <path d="M175 90 V130 M155 110 H195" stroke="#d97706" stroke-width="3"/>
+  <path d="M175 90 V130 M155 110 H195" stroke="#d97706" stroke-width="3" fill="none"/>
   <text x="175" y="86" font-size="12.5" text-anchor="middle" fill="#92400e">전기자</text>
-  <path d="M86 110 H117" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4"/>
-  <path d="M233 110 H264" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 4"/>
+  <path d="M86 110 H117" stroke="#2563eb" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+  <path d="M233 110 H264" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
   <text x="175" y="152" font-size="11.5" text-anchor="middle" fill="#1e293b">정류자</text>
   <rect x="150" y="182" width="18" height="26" fill="#334155"/>
   <rect x="182" y="182" width="18" height="26" fill="#334155"/>
   <text x="175" y="224" font-size="12" text-anchor="middle" fill="#64748b">브러시</text>
-  <path d="M159 182 V168 M191 182 V168" stroke="#1e293b" stroke-width="2.5"/>
+  <path d="M159 182 V168 M191 182 V168" stroke="#1e293b" stroke-width="2.5" fill="none"/>
   <text x="345" y="80" font-size="13" font-weight="700" fill="#166534">발전기: 회전 → 전기</text>
   <text x="345" y="104" font-size="13" font-weight="700" fill="#dc2626">전동기: 전기 → 회전</text>
   <text x="345" y="140" font-size="12" fill="#64748b">보극 · 공극은</text>
@@ -44,15 +44,15 @@ window.CONCEPTS.push(
   <rect x="326" y="40" width="34" height="130" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
   <text x="77" y="112" font-size="15" font-weight="700" text-anchor="middle" fill="#2563eb">N</text>
   <text x="343" y="112" font-size="15" font-weight="700" text-anchor="middle" fill="#dc2626">S</text>
-  <path d="M100 70 H320 M100 105 H320 M100 140 H320" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <path d="M100 70 H320 M100 105 H320 M100 140 H320" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="7 5" fill="none"/>
   <rect x="170" y="86" width="80" height="40" fill="none" stroke="#1e293b" stroke-width="3.5"/>
   <circle cx="170" cy="106" r="9" fill="#fff" stroke="#1e293b" stroke-width="2.5"/>
   <circle cx="170" cy="106" r="3" fill="#0891b2"/>
   <circle cx="250" cy="106" r="9" fill="#fff" stroke="#1e293b" stroke-width="2.5"/>
-  <path d="M244 106 H256 M250 100 V112" stroke="#0891b2" stroke-width="2.5"/>
-  <path d="M170 82 V60" stroke="#dc2626" stroke-width="4"/>
+  <path d="M244 106 H256 M250 100 V112" stroke="#0891b2" stroke-width="2.5" fill="none"/>
+  <path d="M170 82 V60" stroke="#dc2626" stroke-width="4" fill="none"/>
   <path d="M161 60 L170 44 L179 60 z" fill="#dc2626"/>
-  <path d="M250 130 V152" stroke="#dc2626" stroke-width="4"/>
+  <path d="M250 130 V152" stroke="#dc2626" stroke-width="4" fill="none"/>
   <path d="M241 152 L250 168 L259 152 z" fill="#dc2626"/>
   <text x="144" y="52" font-size="14" font-weight="700" fill="#dc2626">힘 F</text>
   <text x="264" y="164" font-size="14" font-weight="700" fill="#dc2626">힘 F</text>
@@ -93,8 +93,8 @@ window.CONCEPTS.push(
  svg:`<svg viewBox="0 0 420 210" xmlns="http://www.w3.org/2000/svg">
   <rect width="420" height="210" fill="#fff"/>
   <path d="M110 60 L60 150 L210 150 Z" fill="none" stroke="#cbd5e1" stroke-width="3" stroke-dasharray="7 5"/>
-  <path d="M110 60 L60 150" stroke="#d97706" stroke-width="6"/>
-  <path d="M60 150 L210 150" stroke="#d97706" stroke-width="6"/>
+  <path d="M110 60 L60 150" stroke="#d97706" stroke-width="6" fill="none"/>
+  <path d="M60 150 L210 150" stroke="#d97706" stroke-width="6" fill="none"/>
   <circle cx="110" cy="60" r="8" fill="#fff" stroke="#1e293b" stroke-width="3"/>
   <circle cx="60" cy="150" r="8" fill="#fff" stroke="#1e293b" stroke-width="3"/>
   <circle cx="210" cy="150" r="8" fill="#fff" stroke="#1e293b" stroke-width="3"/>
@@ -104,7 +104,7 @@ window.CONCEPTS.push(
   <text x="70" y="98" font-size="12.5" font-weight="700" fill="#92400e">Tr1</text>
   <text x="128" y="168" font-size="12.5" font-weight="700" fill="#92400e">Tr2</text>
   <text x="176" y="106" font-size="12" fill="#94a3b8">고장</text>
-  <path d="M150 88 l30 30 M180 88 l-30 30" stroke="#dc2626" stroke-width="3"/>
+  <path d="M150 88 l30 30 M180 88 l-30 30" stroke="#dc2626" stroke-width="3" fill="none"/>
   <text x="265" y="70" font-size="14" font-weight="700" fill="#166534">출력 = √3 × 1대</text>
   <text x="265" y="98" font-size="13" fill="#64748b">이용률 86.6%</text>
   <text x="265" y="120" font-size="13" fill="#64748b">출력비 57.7%</text>
@@ -167,24 +167,24 @@ window.CONCEPTS.push(
  svg:`<svg viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg">
   <rect width="440" height="240" fill="#fff"/>
   <text x="20" y="22" font-size="13.5" font-weight="700" fill="#0891b2">입력 (교류)</text>
-  <path d="M20 66 H200" stroke="#94a3b8" stroke-width="1.8"/>
+  <path d="M20 66 H200" stroke="#94a3b8" stroke-width="1.8" fill="none"/>
   <path d="M20 66 q11 -30 22 0 q11 30 22 0 q11 -30 22 0 q11 30 22 0 q11 -30 22 0 q11 30 22 0 q11 -30 22 0 q11 30 22 0"
         fill="none" stroke="#0891b2" stroke-width="3"/>
   <text x="20" y="104" font-size="11.5" fill="#64748b">위·아래로 방향이 바뀐다</text>
   <text x="240" y="22" font-size="13.5" font-weight="700" fill="#dc2626">반파 정류 (0.45E)</text>
-  <path d="M240 66 H420" stroke="#94a3b8" stroke-width="1.8"/>
+  <path d="M240 66 H420" stroke="#94a3b8" stroke-width="1.8" fill="none"/>
   <path d="M240 66 q11 -30 22 0 H284 q11 -30 22 0 H328 q11 -30 22 0 H372 q11 -30 22 0 H420"
         fill="none" stroke="#dc2626" stroke-width="3"/>
   <text x="240" y="104" font-size="11.5" fill="#94a3b8">한쪽만 통과 → 빈 구간(맥동 큼)</text>
   <text x="20" y="146" font-size="13.5" font-weight="700" fill="#166534">전파 정류 · 브리지 (0.9E)</text>
-  <path d="M20 190 H200" stroke="#94a3b8" stroke-width="1.8"/>
+  <path d="M20 190 H200" stroke="#94a3b8" stroke-width="1.8" fill="none"/>
   <path d="M20 190 q11 -30 22 0 q11 -30 22 0 q11 -30 22 0 q11 -30 22 0 q11 -30 22 0 q11 -30 22 0 q11 -30 22 0 q11 -30 22 0"
         fill="none" stroke="#16a34a" stroke-width="3"/>
   <text x="20" y="216" font-size="11.5" fill="#166534">모두 (+)로 뒤집힘 → 출력 약 2배</text>
   <g transform="translate(258,150)">
     <path d="M14 22 L44 6 L44 38 Z" fill="#fff" stroke="#1e293b" stroke-width="2.5"/>
-    <path d="M44 6 V38" stroke="#1e293b" stroke-width="4"/>
-    <path d="M0 22 H14 M44 22 H74" stroke="#1e293b" stroke-width="2.5"/>
+    <path d="M44 6 V38" stroke="#1e293b" stroke-width="4" fill="none"/>
+    <path d="M0 22 H14 M44 22 H74" stroke="#1e293b" stroke-width="2.5" fill="none"/>
     <text x="36" y="60" font-size="12" text-anchor="middle" fill="#64748b">다이오드</text>
     <text x="90" y="18" font-size="12.5" fill="#64748b">한 방향만</text>
     <text x="90" y="36" font-size="12.5" fill="#64748b">통과시킨다</text>
@@ -200,23 +200,23 @@ window.CONCEPTS.push(
   <rect width="440" height="220" fill="#fff"/>
   <g transform="translate(30,50)">
     <path d="M20 30 L54 12 L54 48 Z" fill="#fff" stroke="#1e293b" stroke-width="2.5"/>
-    <path d="M54 12 V48" stroke="#1e293b" stroke-width="4"/>
-    <path d="M0 30 H20 M54 30 H90" stroke="#1e293b" stroke-width="2.5"/>
+    <path d="M54 12 V48" stroke="#1e293b" stroke-width="4" fill="none"/>
+    <path d="M0 30 H20 M54 30 H90" stroke="#1e293b" stroke-width="2.5" fill="none"/>
     <path d="M42 42 L42 74 H14" fill="none" stroke="#dc2626" stroke-width="2.5"/>
     <text x="6" y="80" font-size="12.5" font-weight="700" fill="#dc2626">G</text>
     <text x="4" y="24" font-size="12" fill="#64748b">A</text>
     <text x="78" y="24" font-size="12" fill="#64748b">K</text>
     <text x="45" y="106" font-size="12" text-anchor="middle" fill="#64748b">SCR</text>
   </g>
-  <path d="M170 130 H420" stroke="#94a3b8" stroke-width="1.8"/>
+  <path d="M170 130 H420" stroke="#94a3b8" stroke-width="1.8" fill="none"/>
   <path d="M170 130 q22 -46 44 0 t44 0 t44 0 t44 0" fill="none" stroke="#cbd5e1" stroke-width="2.5"/>
   <path d="M196 130 q9 -34 18 0" fill="#fecaca" stroke="#dc2626" stroke-width="2.5"/>
   <path d="M284 130 q9 -34 18 0" fill="#fecaca" stroke="#dc2626" stroke-width="2.5"/>
   <path d="M372 130 q9 -34 18 0" fill="#fecaca" stroke="#dc2626" stroke-width="2.5"/>
-  <path d="M196 130 V96" stroke="#dc2626" stroke-width="2" stroke-dasharray="4 3"/>
+  <path d="M196 130 V96" stroke="#dc2626" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
   <text x="196" y="90" font-size="11.5" text-anchor="middle" fill="#dc2626">점호</text>
-  <path d="M170 152 H196" stroke="#166534" stroke-width="2"/>
-  <path d="M170 148 V156 M196 148 V156" stroke="#166534" stroke-width="2"/>
+  <path d="M170 152 H196" stroke="#166534" stroke-width="2" fill="none"/>
+  <path d="M170 148 V156 M196 148 V156" stroke="#166534" stroke-width="2" fill="none"/>
   <text x="183" y="170" font-size="12" text-anchor="middle" fill="#166534">α</text>
   <text x="300" y="170" font-size="12.5" text-anchor="middle" fill="#64748b">색칠된 부분만 부하에 전달</text>
   <text x="300" y="196" font-size="12.5" text-anchor="middle" fill="#dc2626">점호각을 늦추면 출력 ↓</text>
