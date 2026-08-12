@@ -69,13 +69,15 @@ window.CONCEPTS.push(
     <circle cx="370" cy="130" r="10" fill="none" stroke="#7c3aed" stroke-width="3"/>
     <text x="370" y="170" text-anchor="middle" fill="#5b21b6">링 리듀서</text>
   </g>
-  <text x="220" y="216" font-size="12.5" text-anchor="middle" fill="#166534">후강 = 짝수(16·22·28·36·42·54·70) / 박강 = 홀수(19·25·31·39·51·63·75)</text>
+  <text x="220" y="214" font-size="12" text-anchor="middle" fill="#166534">후강 = 안지름 기준 짝수 10종(16·22·28·36·42·54·70·82·92·104)</text>
+  <text x="220" y="228" font-size="12" text-anchor="middle" fill="#166534">박강 = 바깥지름 기준 홀수 7종(19·25·31·39·51·63·75) · 두께 1.2mm</text>
  </svg>`},
 
 {s:"전기설비", t:"케이블트레이 · 덕트 공사", crit:"배선설비공사 및 전선허용전류",
- f:"케이블트레이 종류: 사다리형 · 펀칭형 · 메시형 · 바닥밀폐형",
- pts:["케이블트레이: 케이블을 지지하는 구조물 (금속제·난연성)",
-      "금속덕트: 전선 단면적 합계가 덕트 내부 단면적의 20% 이하",
+ f:"금속덕트 전선 점유율 20% 이하 (제어회로 배선만 넣으면 50% 이하) · 지지점 3m 이하",
+ pts:["케이블트레이 종류: 사다리형 · 펀칭형 · 메시형 · 바닥밀폐형 (금속제·난연성)",
+      "금속덕트: 전선 단면적 합계가 덕트 내부 단면적의 20% 이하 (제어회로만이면 50%)",
+      "덕트 지지점 간 거리 3m 이하 (출입 못 하는 곳에 수직 설치 시 6m 이하)",
       "버스덕트: 큰 전류를 보내는 간선용 / 라이팅덕트: 조명기구 이동 설치용"],
  svg:`<svg viewBox="0 0 440 230" xmlns="http://www.w3.org/2000/svg">
   <rect width="440" height="230" fill="#fff"/>
@@ -89,6 +91,7 @@ window.CONCEPTS.push(
   <circle cx="280" cy="58" r="7" fill="#0891b2"/><circle cx="302" cy="58" r="7" fill="#0891b2"/>
   <circle cx="324" cy="58" r="7" fill="#0891b2"/><circle cx="280" cy="76" r="7" fill="#0891b2"/>
   <text x="332" y="110" font-size="12" text-anchor="middle" fill="#155e75">전선 총단면적 20% 이하</text>
+  <text x="332" y="126" font-size="11.5" text-anchor="middle" fill="#0891b2">(제어회로 전용은 50%)</text>
   <rect x="24" y="140" width="180" height="58" rx="6" fill="#fffbeb" stroke="#fcd34d" stroke-width="2"/>
   <text x="38" y="162" font-size="12.5" font-weight="700" fill="#92400e">버스덕트</text>
   <text x="38" y="182" font-size="12" fill="#78350f">대전류 간선용 (도체를 덕트에)</text>
@@ -98,10 +101,11 @@ window.CONCEPTS.push(
  </svg>`},
 
 {s:"전기설비", t:"과전류차단기 · 누전차단기 동작", crit:"전선 및 기계기구의 보안공사",
- f:"누전차단기: 정격감도전류 30[mA] 이하, 동작시간 0.03초 이내",
+ f:"일반 30[mA] 이하·0.03초 이내 · 욕실/화장실 등 물에 젖는 장소는 15[mA] 이하·0.03초",
  pts:["과전류차단기(MCCB): 전류가 과하게 흐르면 끊음 → 전선·기기 보호",
       "누전차단기(ELB): 들어간 전류와 나온 전류의 차이를 감지 → 사람 보호",
-      "인체 감전 보호용은 고감도·고속형 30mA·0.03초 이내"],
+      "조명·32A 이하 콘센트 분기회로는 30mA 이하",
+      "욕실·화장실처럼 몸이 젖는 곳은 더 엄격하게 15mA 이하 (자주 출제!)"],
  svg:`<svg viewBox="0 0 440 230" xmlns="http://www.w3.org/2000/svg">
   <rect width="440" height="230" fill="#fff"/>
   <text x="20" y="24" font-size="13" font-weight="700" fill="#334155">정상: 들어간 전류 = 나온 전류</text>
@@ -121,15 +125,17 @@ window.CONCEPTS.push(
   <text x="392" y="140" font-size="12" text-anchor="middle" fill="#dc2626">누설전류</text>
   <path d="M330 176 h60 m-30 -14 v14" stroke="#16a34a" stroke-width="3" fill="none"/>
   <text x="300" y="112" font-size="12" fill="#991b1b">차이 발생!</text>
-  <rect x="30" y="160" width="240" height="50" rx="8" fill="#fef2f2" stroke="#fca5a5" stroke-width="2"/>
-  <text x="46" y="182" font-size="12.5" font-weight="700" fill="#991b1b">인체 보호용 누전차단기</text>
-  <text x="46" y="202" font-size="12.5" fill="#7f1d1d">정격감도전류 30mA 이하 · 0.03초 이내 동작</text>
+  <rect x="30" y="158" width="290" height="56" rx="8" fill="#fef2f2" stroke="#fca5a5" stroke-width="2"/>
+  <text x="44" y="178" font-size="12.5" font-weight="700" fill="#991b1b">인체 보호용 누전차단기 감도전류</text>
+  <text x="44" y="196" font-size="12" fill="#7f1d1d">일반(조명·32A 이하 콘센트) 30mA 이하 · 0.03초</text>
+  <text x="44" y="210" font-size="12" font-weight="700" fill="#dc2626">욕실·화장실 등 물에 젖는 곳 15mA 이하</text>
  </svg>`},
 
 {s:"전기설비", t:"피뢰설비 (낙뢰 보호)", crit:"전선 및 기계기구의 보안공사",
- f:"높이 20[m] 이상 건축물에 설치 · 수뢰부 → 인하도선 → 접지극",
+ f:"높이 20[m] 이상 건축물에 설치 · 수뢰부 → 인하도선 → 접지극 · 접지저항 10[Ω] 이하",
  pts:["돌침(수뢰부)이 벼락을 받아 인하도선으로 땅에 흘려보낸다",
       "높이 20m 이상 건축물은 피뢰설비 설치 대상",
+      "피뢰시스템에 접지도체가 접속된 경우 접지저항 10[Ω] 이하 (출제 포인트)",
       "피뢰침 보호각은 일반 건물 60° 이하, 위험물 장소 45° 이하"],
  svg:`<svg viewBox="0 0 440 240" xmlns="http://www.w3.org/2000/svg">
   <rect width="440" height="240" fill="#fff"/>
