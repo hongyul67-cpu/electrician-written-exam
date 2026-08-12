@@ -53,6 +53,46 @@
   .zoomwrap img{display:block;width:100%;height:auto}
   .zoomhint{font-size:12px;color:#94a3b8}
   .tapzoom{cursor:zoom-in}
+  /* 계산 문제 풀이 */
+  .kstep{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid var(--line);
+    border-radius:11px;padding:11px 13px;margin-top:8px}
+  .kstep .kn{flex:0 0 auto;width:24px;height:24px;border-radius:999px;background:var(--brand);color:#fff;
+    font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .kstep .ktxt{flex:1;min-width:0}
+  .kstep .ksay{font-size:13.5px;color:#475569;line-height:1.5}
+  .kstep .kmath{font-size:16px;font-weight:700;color:#0f172a;margin-top:4px;word-break:break-all;
+    font-family:"Cambria Math","Times New Roman",serif}
+  .kans{margin-top:11px;background:#dcfce7;border:1px solid #86efac;border-radius:11px;padding:11px 13px;
+    font-size:16px;font-weight:800;color:#166534}
+  .ktip{margin-top:9px;background:#fffbeb;border:1px solid #fcd34d;border-radius:11px;padding:10px 13px;
+    font-size:13.5px;line-height:1.65;color:#92400e;word-break:keep-all}
+  .kq{font-size:15.5px;font-weight:700;line-height:1.6;margin:8px 0 10px;word-break:keep-all}
+  .kch{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px}
+  .kch span{border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:13.5px;background:#fff}
+  .kch span.on{border-color:var(--ok);background:var(--ok-bg);font-weight:700;color:#166534}
+  .big .kstep .kmath{font-size:23px}
+  .big .kstep .ksay{font-size:18px}
+  .big .kq{font-size:22px}
+  .big .kans{font-size:22px}
+  .big .ktip{font-size:18px}
+  /* 차시별 수업 진행안 */
+  .lcard{border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:10px;background:#fff}
+  .lcard .lno{display:inline-block;background:var(--brand);color:#fff;border-radius:8px;
+    padding:3px 9px;font-size:12.5px;font-weight:800}
+  .lcard h4{margin:8px 0 4px;font-size:15.5px;word-break:keep-all}
+  .lcard .lgoal{font-size:13px;color:var(--muted);line-height:1.6;word-break:keep-all}
+  .lmeta{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .lmeta span{font-size:11.5px;border-radius:999px;padding:3px 9px;background:var(--soft);color:#334155}
+  .lflow{margin-top:10px;border-top:1px dashed var(--line);padding-top:9px}
+  .lrow{display:flex;gap:9px;font-size:13.5px;line-height:1.6;margin-bottom:6px}
+  .lrow b{flex:0 0 46px;color:var(--brand)}
+  .lrow span{flex:1;word-break:keep-all;color:#334155}
+  .lhw{margin-top:9px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:10px;padding:9px 12px;
+    font-size:13px;color:#155e75;word-break:keep-all}
+  .lbtns{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .lbtns button{border:0;border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;background:var(--soft);color:#334155}
+  .lbtns button.go{background:var(--brand);color:#fff}
   /* 그림 개념 사전 */
   .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
   .ccard{border:1px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;background:#fff;transition:.14s}
@@ -197,6 +237,8 @@
 <script src="data/concepts-theory2.js"></script>
 <script src="data/concepts-machine2.js"></script>
 <script src="data/concepts-setup2.js"></script>
+<script src="data/calcs.js"></script>
+<script src="data/lessons.js"></script>
 <script src="config.js"></script>
 <script>
 const $=(s,el=document)=>el.querySelector(s);
@@ -309,6 +351,14 @@ function home(){
       <div class="mode wide" onclick="randomPick()">
         <div class="ic">🎲</div><h3>유형별 랜덤 테스트</h3>
         <p>과목(전기이론·전기기기·전기설비)과 문항 수를 골라, 24회차 전체에서 랜덤으로 뽑아 나만의 시험지로 채점.</p>
+      </div>
+      <div class="mode wide" onclick="lessonOpen()" style="border-color:#c7d2fe;background:#eef2ff">
+        <div class="ic">📅</div><h3>차시별 수업 진행안 <span style="font-size:11.5px;color:#4338ca">교사용</span></h3>
+        <p><b>16차시</b> 수업 계획 — 차시마다 학습목표·45분 진행순서·쓸 그림/이론/계산·과제가 정리되어 있고, 버튼으로 바로 이동합니다.</p>
+      </div>
+      <div class="mode wide" onclick="calcOpen()" style="border-color:#fca5a5;background:#fef2f2">
+        <div class="ic">🧮</div><h3>계산 문제 풀이</h3>
+        <p>교재에 수식 해설이 없는 계산 문제를 <b>기출 24가지 유형</b>으로 단계별 풀이. 실수 포인트·검산법까지.</p>
       </div>
       <div class="mode wide" onclick="conceptOpen()" style="border-color:#a5f3fc;background:#ecfeff">
         <div class="ic">🖼️</div><h3>그림으로 개념 잡기</h3>
@@ -644,6 +694,123 @@ function critTheoryMap(){
 function theoryPageFor(critName){
   const t=critTheoryMap()[critName];if(!t)return null;
   return (window.THEORY||[]).find(p=>p.topic===t)||null;
+}
+
+/* ---------------- 🧮 계산 문제 풀이 ---------------- */
+let CALC=null;
+function calcOpen(subj){
+  const K=window.CALCS||[];
+  if(!K.length){alert("계산 풀이 자료를 불러오지 못했습니다.");return;}
+  const subs=[...new Set(K.map(x=>x.s))];
+  const s=subj||(CALC&&CALC.subj)||subs[0];
+  CALC={subj:s,list:K.filter(x=>x.s===s),i:-1};
+  renderCalcList();
+}
+function renderCalcList(){
+  const K=window.CALCS||[];
+  const subs=[...new Set(K.map(x=>x.s))];
+  const rows=CALC.list.map((c,i)=>`
+    <div class="crit" onclick="calcShow(${i})" style="cursor:pointer">
+      <div class="ctop"><h4>🧮 ${esc(c.t)}</h4>
+        <span class="cmeta">${esc(c.crit)}${c.n?` · 유사 ${c.n}문항`:""}</span></div>
+      <div class="csub">${esc(c.f)}</div>
+    </div>`).join("");
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">계산 문제 풀이</span>
+    <h3 style="margin:10px 0 4px">🧮 계산 문제, 단계별로 함께 풀기</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 6px">교재에 수식 해설이 없는 계산 문제를 <b>실제 기출로 ${K.length}가지 유형</b> 단계별 풀이로 만들었습니다.
+      수업에서 칠판처럼 한 줄씩 보여주세요.</p>
+    <div class="subjbar">
+      ${subs.map(s=>`<button class="${s===CALC.subj?'on':''}" onclick="calcOpen('${esc(s)}')">${esc(s)} (${K.filter(x=>x.s===s).length})</button>`).join("")}
+    </div>
+    ${rows}
+  </div>`;
+  window.scrollTo(0,0);
+}
+function calcShow(i){
+  CALC.i=i;const c=CALC.list[i];
+  const cnt=(topicIndex()[c.crit]||[]).length;
+  app.innerHTML=`
+  <div class="row" style="justify-content:space-between;color:#fff;margin-bottom:8px">
+    <button class="back" onclick="renderCalcList()">← 유형 목록</button>
+    <span style="font-size:13px;color:#fde68a">${esc(c.s)} · ${CALC.i+1}/${CALC.list.length}</span>
+  </div>
+  <div class="card big" id="calcview">
+    <h3 style="margin:0 0 2px;font-size:20px">🧮 ${esc(c.t)}</h3>
+    <div class="cform">📐 ${esc(c.f)}</div>
+    <div class="kq">${esc(c.q)}</div>
+    <div class="kch">${c.ch.map((x,k)=>`<span class="${k+1===c.a?'on':''}">${NUM[k+1]} ${esc(x)}</span>`).join("")}</div>
+    ${c.steps.map((st,k)=>`<div class="kstep"><div class="kn">${k+1}</div><div class="ktxt">
+      <div class="ksay">${esc(st[0])}</div><div class="kmath">${esc(st[1])}</div></div></div>`).join("")}
+    <div class="kans">✅ 정답 ${NUM[c.a]} ${esc(c.ch[c.a-1])}</div>
+    <div class="ktip">💡 ${esc(c.tip)}</div>
+    ${cnt?`<button class="btn" style="width:100%;margin-top:11px;background:#0891b2;color:#fff"
+        onclick="topicLearn('${esc(c.crit)}')">🔥 같은 항목 문제 풀어보기 · ${esc(c.crit)} (${cnt}문항)</button>`:""}
+    <div class="navbtns">
+      <button class="btn ghost" onclick="calcShow(${i-1})" ${i===0?"disabled":""}>◀ 이전 유형</button>
+      <button class="btn primary" onclick="calcShow(${i+1})" ${i===CALC.list.length-1?"disabled":""}>다음 유형 ▶</button>
+    </div>
+  </div>`;
+  window.scrollTo(0,0);
+}
+document.addEventListener("keydown",e=>{
+  if(!$("#calcview")||!CALC||CALC.i<0)return;
+  if(e.key===" "||e.key==="ArrowRight"){e.preventDefault();if(CALC.i<CALC.list.length-1)calcShow(CALC.i+1);}
+  else if(e.key==="ArrowLeft"){e.preventDefault();if(CALC.i>0)calcShow(CALC.i-1);}
+});
+
+/* ---------------- 📅 차시별 수업 진행안 ---------------- */
+function lessonOpen(){
+  const L=window.LESSONS||[];
+  if(!L.length){alert("수업 진행안 자료를 불러오지 못했습니다.");return;}
+  const cards=L.map(l=>{
+    const conBtns=(l.con||[]).map(t=>`<button onclick="gotoConcept('${esc(t)}')">🖼️ ${esc(t)}</button>`).join("");
+    const calcBtns=(l.calc||[]).map(t=>`<button onclick="gotoCalc('${esc(t)}')">🧮 ${esc(t)}</button>`).join("");
+    const thBtns=(l.theory||[]).map(p=>`<button onclick="gotoTheory(${p})">📘 이론 p${p}</button>`).join("");
+    const critBtns=(l.crit||[]).map(c=>`<button class="go" onclick="topicTest('${esc(c)}')">📝 ${esc(c)} 시험</button>`).join("");
+    return `<div class="lcard">
+      <span class="lno">${l.n}차시</span>
+      <h4>${esc(l.t)}</h4>
+      <div class="lgoal">🎯 ${esc(l.goal)}</div>
+      <div class="lmeta"><span>${esc(l.subj)}</span>${(l.crit||[]).map(c=>`<span>${esc(c)}</span>`).join("")}</div>
+      <div class="lflow">${(l.flow||[]).map(f=>`<div class="lrow"><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div>`).join("")}</div>
+      <div class="lhw">📮 과제 · ${esc(l.hw)}</div>
+      <div class="lbtns">${conBtns}${thBtns}${calcBtns}</div>
+      <div class="lbtns">${critBtns}</div>
+    </div>`;}).join("");
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">차시별 수업 진행안</span>
+    <h3 style="margin:10px 0 4px">📅 16차시 수업 계획</h3>
+    <p style="color:var(--muted);font-size:13.5px;margin:0 0 4px">차시마다 <b>학습목표 · 45분 진행순서 · 쓸 그림/이론/계산 · 과제</b>가 있습니다.
+      버튼을 누르면 그 자료로 바로 이동합니다.</p>
+    ${cards}
+  </div>`;
+  window.scrollTo(0,0);
+}
+function gotoConcept(title){
+  const C=window.CONCEPTS||[];const c=C.find(x=>x.t===title);
+  if(!c){alert("그림을 찾지 못했습니다.");return;}
+  CON={subj:c.s,list:C.filter(x=>x.s===c.s),i:0};
+  CON.i=CON.list.findIndex(x=>x.t===title);
+  conceptShow(CON.i);
+}
+function gotoCalc(title){
+  const K=window.CALCS||[];const c=K.find(x=>x.t===title);
+  if(!c){alert("계산 풀이를 찾지 못했습니다.");return;}
+  CALC={subj:c.s,list:K.filter(x=>x.s===c.s),i:0};
+  CALC.i=CALC.list.findIndex(x=>x.t===title);
+  calcShow(CALC.i);
+}
+function gotoTheory(page){
+  const T=window.THEORY||[];const p=T.find(x=>x.page===page);
+  if(!p){alert("이론 쪽을 찾지 못했습니다.");return;}
+  THEO={subj:p.subject,list:T.filter(x=>x.subject===p.subject),i:0};
+  THEO.i=THEO.list.findIndex(x=>x.page===page);
+  renderTheory();
 }
 
 /* ---------------- 🖼️ 그림 개념 사전 ---------------- */
