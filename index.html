@@ -53,6 +53,47 @@
   .zoomwrap img{display:block;width:100%;height:auto}
   .zoomhint{font-size:12px;color:#94a3b8}
   .tapzoom{cursor:zoom-in}
+  /* 🏆 티어·XP·랭킹 */
+  .tierbar{display:flex;align-items:center;gap:11px;background:#0f172a;border-radius:14px;
+    padding:12px 14px;margin-bottom:12px;cursor:pointer;border:2px solid #1e293b}
+  .tierbar:hover{border-color:var(--brand)}
+  .tierbar .tic{font-size:30px;line-height:1}
+  .tierbar .tinfo{flex:1;min-width:0}
+  .tierbar .tname{font-size:15.5px;font-weight:900;letter-spacing:-.3px}
+  .tierbar .txp{font-size:11.5px;color:#94a3b8;margin-top:2px}
+  .tierbar .tprog{height:8px;background:#1e293b;border-radius:999px;overflow:hidden;margin-top:6px}
+  .tierbar .tprog>div{height:100%;border-radius:999px;transition:width .5s}
+  .tierbar .tgo{font-size:11.5px;color:#cbd5e1;white-space:nowrap}
+  .tladder{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+  .trow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;
+    padding:9px 12px;background:#fff}
+  .trow.on{border-width:2px;background:#fffbeb}
+  .trow .ric{font-size:22px}
+  .trow .rn{flex:1;font-size:14px;font-weight:800}
+  .trow .rx{font-size:12px;color:var(--muted)}
+  .xptoast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:9998;
+    background:#0f172a;color:#fde68a;border:2px solid #f59e0b;border-radius:999px;
+    padding:10px 20px;font-size:15px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.35);
+    animation:xpin .3s ease}
+  @keyframes xpin{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+  .lvlup{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.93);display:flex;
+    flex-direction:column;align-items:center;justify-content:center;color:#fff;cursor:pointer;text-align:center;padding:20px}
+  .lvlup .lic{font-size:22vw;line-height:1;animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+  .lvlup .lt{font-size:16px;color:#fde68a;letter-spacing:4px;margin-bottom:6px}
+  .lvlup .ln{font-size:34px;font-weight:900;margin-bottom:8px}
+  .lvlup .lh{font-size:14px;color:#94a3b8;margin-top:22px}
+  .combo{display:inline-block;background:#fef3c7;color:#b45309;border:1px solid #fcd34d;
+    border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:800;margin-left:6px}
+  .recrow{display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line);padding:9px 2px;font-size:13.5px}
+  .recrow .rk{width:26px;font-weight:900;color:var(--brand);text-align:center}
+  .recrow .rt{flex:1;min-width:0;color:#334155;word-break:keep-all}
+  .recrow .rs{font-weight:800;color:#0f172a;white-space:nowrap}
+  .recrow .rd{font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:10px}
+  .statbox{background:var(--soft);border-radius:11px;padding:10px;text-align:center}
+  .statbox b{display:block;font-size:19px;color:var(--brand);font-weight:900}
+  .statbox span{font-size:11.5px;color:#475569}
   /* 계산 문제 풀이 */
   .kstep{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid var(--line);
     border-radius:11px;padding:11px 13px;margin-top:8px}
@@ -263,8 +304,81 @@ const LS={
   getStatTopic(){try{return JSON.parse(localStorage.getItem(this.topicKey))||{}}catch(e){return{}}},
   setStatTopic(s){localStorage.setItem(this.topicKey,JSON.stringify(s))},
   addTopicResult(topic,ok){if(!topic)return;const s=this.getStatTopic();
-    if(!s[topic])s[topic]={solved:0,correct:0};s[topic].solved++;if(ok)s[topic].correct++;this.setStatTopic(s);}
+    if(!s[topic])s[topic]={solved:0,correct:0};s[topic].solved++;if(ok)s[topic].correct++;this.setStatTopic(s);},
+  /* ---- 게임(티어·XP·기록) ---- */
+  gameKey:"elecexam_game_v1",
+  getGame(){let g={};try{g=JSON.parse(localStorage.getItem(this.gameKey))||{}}catch(e){g={}}
+    return Object.assign({xp:0,best:[],seen:{},days:0,lastDay:"",maxCombo:0,exams:0,passed:0},g);},
+  setGame(g){localStorage.setItem(this.gameKey,JSON.stringify(g));},
+  addXP(n){if(!n)return;const g=this.getGame();g.xp=(g.xp||0)+n;this.setGame(g);},
+  markDay(){const g=this.getGame();const d=new Date().toISOString().slice(0,10);
+    if(g.lastDay!==d){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+      g.days=(g.lastDay===y)?(g.days||0)+1:1;g.lastDay=d;this.setGame(g);}},
+  addRecord(title,score,correct,total){const g=this.getGame();
+    g.best=(g.best||[]).concat([{t:title,s:score,c:correct,n:total,d:new Date().toISOString().slice(0,10)}]);
+    g.best.sort((a,b)=>b.s-a.s||b.n-a.n);g.best=g.best.slice(0,20);
+    g.exams=(g.exams||0)+1;if(score>=60)g.passed=(g.passed||0)+1;this.setGame(g);},
+  seenOnce(key){const g=this.getGame();if(g.seen[key])return false;g.seen[key]=1;this.setGame(g);return true;}
 };
+
+/* ---------------- 🏆 티어 (아이언 → 마스터) ---------------- */
+const TIERS=[
+  {n:"아이언",   min:0,    ic:"⬛", c:"#94a3b8"},
+  {n:"브론즈",   min:300,  ic:"🥉", c:"#b45309"},
+  {n:"실버",     min:800,  ic:"🥈", c:"#cbd5e1"},
+  {n:"골드",     min:1600, ic:"🥇", c:"#f59e0b"},
+  {n:"플래티넘", min:2800, ic:"💠", c:"#22d3ee"},
+  {n:"다이아",   min:4500, ic:"💎", c:"#60a5fa"},
+  {n:"마스터",   min:7000, ic:"👑", c:"#c084fc"}
+];
+const ROMAN=["Ⅲ","Ⅱ","Ⅰ"];
+function tierInfo(xp){
+  xp=Math.max(0,xp|0);
+  let i=0;for(let k=0;k<TIERS.length;k++){if(xp>=TIERS[k].min)i=k;}
+  const t=TIERS[i],next=TIERS[i+1];
+  if(!next)return{t,i,sub:"",label:t.n,pct:100,toNext:0,nextLabel:null};
+  const span=next.min-t.min,into=xp-t.min;
+  const sub=ROMAN[Math.min(2,Math.floor(into/(span/3)))];
+  return{t,i,sub,label:t.n+" "+sub,pct:Math.max(3,Math.round(into/span*100)),
+         toNext:next.min-xp,nextLabel:next.n};
+}
+function xpGain(n,why){
+  if(!n)return;
+  const before=tierInfo(LS.getGame().xp);
+  LS.addXP(n);
+  const after=tierInfo(LS.getGame().xp);
+  toastXP(n,why);
+  if(after.i>before.i)setTimeout(()=>levelUp(after),650);
+  SYNC.saveSoon();
+}
+function toastXP(n,why){
+  const old=$("#xptoast");if(old)old.remove();
+  const d=document.createElement("div");d.className="xptoast";d.id="xptoast";
+  d.textContent=`+${n} XP${why?" · "+why:""}`;
+  document.body.appendChild(d);
+  setTimeout(()=>{const e=$("#xptoast");if(e)e.remove();},2200);
+}
+function levelUp(info){
+  const ov=document.createElement("div");ov.className="lvlup";
+  ov.innerHTML=`<div class="lt">계급 상승!</div><div class="lic">${info.t.ic}</div>
+    <div class="ln" style="color:${info.t.c}">${esc(info.label)}</div>
+    <div style="font-size:15px;color:#e2e8f0">축하합니다! 새 계급에 도달했어요</div>
+    <div class="lh">화면을 누르면 계속</div>`;
+  ov.onclick=()=>ov.remove();
+  document.body.appendChild(ov);
+}
+function tierBarHTML(){
+  const g=LS.getGame(),info=tierInfo(g.xp);
+  return `<div class="tierbar" onclick="rankOpen()">
+    <div class="tic">${info.t.ic}</div>
+    <div class="tinfo">
+      <div class="tname" style="color:${info.t.c}">${esc(info.label)}</div>
+      <div class="txp">${(g.xp||0).toLocaleString()} XP${info.nextLabel?` · ${info.nextLabel}까지 ${info.toNext.toLocaleString()} XP`:" · 최고 계급!"}</div>
+      <div class="tprog"><div style="width:${info.pct}%;background:${info.t.c}"></div></div>
+    </div>
+    <div class="tgo">🏆 랭킹 ▸</div>
+  </div>`;
+}
 
 /* ---------------- 클라우드 동기화 (Google 시트 / Apps Script) ---------------- */
 const SYNC_URL=(window.ELECEXAM_CONFIG&&window.ELECEXAM_CONFIG.syncUrl)||"";
@@ -277,7 +391,9 @@ const SYNC={
   _post(obj){if(!this.ready())return;
     try{fetch(SYNC_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)});}catch(e){}},
   save(){if(!this.ready())return;const me=this.me();
-    this._post({action:"save",cls:me.cls,name:me.name,wrong:LS.getWrong(),stat:LS.getStat()});flashSync();},
+    const g=LS.getGame(),ti=tierInfo(g.xp);
+    const stat=Object.assign({},LS.getStat(),{xp:g.xp||0,tier:ti.label,days:g.days||0,maxCombo:g.maxCombo||0});
+    this._post({action:"save",cls:me.cls,name:me.name,wrong:LS.getWrong(),stat:stat});flashSync();},
   saveSoon(){if(!this.ready())return;clearTimeout(this._t);this._t=setTimeout(()=>this.save(),1200);},
   result(exam,score,correct,total){if(!this.ready())return;const me=this.me();
     this._post({action:"result",cls:me.cls,name:me.name,exam:exam,score:score,correct:correct,total:total});},
@@ -343,6 +459,7 @@ function home(){
     ${SYNC.on()?`<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13.5px">
       <span>👤 <b>${esc(me.cls||"")} ${esc(me.name||"")}</b> <span id="syncdot" style="color:var(--muted);margin-left:6px">☁ 자동 저장</span></span>
       <button class="back" style="margin:0" onclick="logout()">학습자 변경</button></div>`:""}
+    ${tierBarHTML()}
     <div class="modes">
       <div class="mode wide" onclick="startCBTpick()">
         <div class="ic">📝</div><h3>CBT 모의고사</h3>
@@ -696,6 +813,63 @@ function theoryPageFor(critName){
   return (window.THEORY||[]).find(p=>p.topic===t)||null;
 }
 
+/* ---------------- 🏆 랭킹 · 전적 ---------------- */
+function rankOpen(){
+  const g=LS.getGame(),info=tierInfo(g.xp),st=LS.getStat(),sub=LS.getStatSubj();
+  const acc=st.solved?Math.round(st.correct/st.solved*100):0;
+  const ladder=TIERS.map((t,k)=>{
+    const on=k===info.i;
+    return `<div class="trow${on?" on":""}" ${on?`style="border-color:${t.c}"`:""}>
+      <div class="ric">${t.ic}</div>
+      <div class="rn" style="color:${on?t.c:'#334155'}">${t.n}${on?" "+info.sub:""}</div>
+      <div class="rx">${t.min.toLocaleString()} XP${on?" ← 지금":""}</div>
+    </div>`;}).join("");
+  const recs=(g.best||[]).slice(0,10).map((r,i)=>`
+    <div class="recrow"><div class="rk">${i+1}</div>
+      <div class="rt">${esc(r.t)}</div>
+      <div class="rs">${r.s}점</div><div class="rd">${esc(r.d)}</div></div>`).join("")
+    || `<div class="empty" style="padding:18px">아직 시험 기록이 없어요. 한 번 풀어보면 여기에 순위가 쌓입니다 💪</div>`;
+  const subRows=Object.keys(sub).map(k=>{const d=sub[k],a=d.solved?Math.round(d.correct/d.solved*100):0;
+    return `<div class="recrow"><div class="rt">${esc(k)}</div>
+      <div class="rs">${a}%</div><div class="rd">${d.correct}/${d.solved}</div></div>`;}).join("")
+    || `<div class="empty" style="padding:14px">과목별 기록 없음</div>`;
+  app.innerHTML=`
+  <button class="back" onclick="home()">← 홈</button>
+  <div class="card">
+    <span class="pill">랭킹 · 전적</span>
+    <div style="text-align:center;padding:14px 0 6px">
+      <div style="font-size:62px;line-height:1">${info.t.ic}</div>
+      <div style="font-size:26px;font-weight:900;color:${info.t.c};margin-top:4px">${esc(info.label)}</div>
+      <div style="font-size:14px;color:var(--muted);margin-top:4px">${(g.xp||0).toLocaleString()} XP
+        ${info.nextLabel?` · <b style="color:${info.t.c}">${esc(info.nextLabel)}</b>까지 ${info.toNext.toLocaleString()} XP`:" · 최고 계급 달성! 👑"}</div>
+      <div class="tprog" style="max-width:320px;margin:10px auto 0;background:#e2e8f0">
+        <div style="width:${info.pct}%;background:${info.t.c};height:8px;border-radius:999px"></div></div>
+    </div>
+    <div class="statgrid">
+      <div class="statbox"><b>${st.solved||0}</b><span>푼 문항</span></div>
+      <div class="statbox"><b>${acc}%</b><span>정답률</span></div>
+      <div class="statbox"><b>${g.exams||0}</b><span>시험 횟수</span></div>
+      <div class="statbox"><b>${g.passed||0}</b><span>합격 횟수</span></div>
+      <div class="statbox"><b>${g.maxCombo||0}</b><span>최고 연속정답</span></div>
+      <div class="statbox"><b>${g.days||0}</b><span>연속 학습일</span></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b style="font-size:14.5px">🥇 내 최고 기록 TOP 10</b>
+    <div style="margin-top:6px">${recs}</div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b style="font-size:14.5px">📊 과목별 정답률</b>
+    <div style="margin-top:6px">${subRows}</div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <b style="font-size:14.5px">🏅 계급 사다리</b>
+    <p style="color:var(--muted);font-size:12.5px;margin:5px 0 0">문제를 맞히면 XP를 얻습니다 · 정답 +10 · 합격 보너스 +50 · 90점 이상 +100 · 연속정답 보너스</p>
+    <div class="tladder">${ladder}</div>
+  </div>`;
+  window.scrollTo(0,0);
+}
+
 /* ---------------- 🧮 계산 문제 풀이 ---------------- */
 let CALC=null;
 function calcOpen(subj){
@@ -731,6 +905,7 @@ function renderCalcList(){
 }
 function calcShow(i){
   CALC.i=i;const c=CALC.list[i];
+  if(LS.seenOnce("k:"+c.t)){LS.markDay();xpGain(5,"계산 유형 정복 🧮");}
   const cnt=(topicIndex()[c.crit]||[]).length;
   app.innerHTML=`
   <div class="row" style="justify-content:space-between;color:#fff;margin-bottom:8px">
@@ -846,6 +1021,7 @@ function renderConceptList(){
 }
 function conceptShow(i){
   CON.i=i;const c=CON.list[i];
+  if(LS.seenOnce("c:"+c.t)){LS.markDay();xpGain(3,"새 개념 그림 📖");}
   const cnt=c.crit?(topicIndex()[c.crit]||[]).length:0;
   app.innerHTML=`
   <div class="row" style="justify-content:space-between;color:#fff;margin-bottom:8px">
@@ -1067,6 +1243,8 @@ function togAnswer(n){
   const st=LS.getStat();st.solved++;if(ok)st.correct++;LS.setStat(st);
   LS.addSubjResult(q.subject,ok);LS.addTopicResult(topicOf(q),ok);
   if(!ok)LS.addWrong(q._k,q.no);
+  LS.markDay();
+  xpGain(ok?pts*10:2, ok?(pts===3?"도움 없이 정답! 💯":"정답"):"참여");
   SYNC.saveSoon();renderTog();
 }
 function togHint(){togUsed().hint=true;renderTog();}
@@ -1276,11 +1454,26 @@ function submitCBT(){
   if(un>0&&!(CBT.timed&&CBT.left<=0)&&!confirm(`아직 ${un}문제를 풀지 않았습니다. 제출할까요?`))return;
   clearInterval(CBT.timer);CBT.submitted=true;
   const e=CBT.exam,k=examKey(e);let correct=0;const wrongList=[];
+  let combo=0,maxCombo=0;
   e.questions.forEach(q=>{const a=CBT.ans[q.no];const ok=a===q.answer;
     LS.addSubjResult(q.subject,ok);LS.addTopicResult(topicOf(q),ok);
+    if(ok){combo++;if(combo>maxCombo)maxCombo=combo;}else combo=0;
     if(ok)correct++;else{wrongList.push(q);LS.addWrong(e.custom?q._k:k, e.custom?q._ono:q.no);}});
+  CBT._combo=maxCombo;
   const st=LS.getStat();st.solved+=e.questions.length;st.correct+=correct;st.exams+=1;LS.setStat(st);
   const total=e.questions.length,score=Math.round(correct/total*100);
+  // ── XP 지급 (정답 +10 / 오답 +2 / 합격 +50 / 90점↑ +100 / 연속정답 보너스)
+  const mc=CBT._combo||0;
+  let gain=correct*10+(total-correct)*2;
+  let why="정답 "+correct+"개";
+  if(score>=60){gain+=50;why+=" · 합격";}
+  if(score>=90){gain+=100;why+=" · 90점↑";}
+  if(mc>=10){gain+=50;why+=" · "+mc+"연속!";}
+  else if(mc>=5){gain+=20;why+=" · "+mc+"연속";}
+  const gm=LS.getGame();if(mc>(gm.maxCombo||0)){gm.maxCombo=mc;LS.setGame(gm);}
+  LS.addRecord(e.title,score,correct,total);LS.markDay();
+  CBT._xp=gain;CBT._maxCombo=mc;
+  xpGain(gain,why);
   SYNC.result(e.title,score,correct,total);SYNC.save();
   resultCBT(correct,wrongList);
 }
@@ -1293,7 +1486,11 @@ function resultCBT(correct,wrongList){
     <span class="pill">${e.title} · 결과</span>
     <div class="scorebig" style="color:${color};margin-top:10px">${score}점</div>
     <div class="passbar"><div style="width:${score}%;background:${color}"></div></div>
-    <div class="result-note">${correct} / ${total} 정답 · <b style="color:${color}">${pass?"합격 🎉":"불합격 (60점 미만)"}</b></div>
+    <div class="result-note">${correct} / ${total} 정답 · <b style="color:${color}">${pass?"합격 🎉":"불합격 (60점 미만)"}</b>
+      ${CBT._maxCombo>=5?`<span class="combo">🔥 ${CBT._maxCombo}연속 정답</span>`:""}</div>
+    ${CBT._xp?`<div style="text-align:center;margin-top:10px;font-size:16px;font-weight:900;color:#b45309">
+      ⚡ +${CBT._xp} XP 획득!</div>
+      <div style="margin-top:8px">${tierBarHTML()}</div>`:""}
     ${(window.ResultCollector&&ResultCollector.config&&ResultCollector.config.endpoint)?`<button class="btn" style="width:100%;margin-top:14px;background:#16a34a;color:#fff" onclick="submitResult()">📤 선생님께 결과 제출</button>`:""}
     <div class="navbtns" style="margin-top:12px">
       <button class="btn ghost" onclick="retryCBT()">${CBT.exam.custom?"새 문제로 다시":"다시 풀기"}</button>
@@ -1383,7 +1580,9 @@ function renderStudy(){
     if(!done)d.onclick=()=>{STUDY.picked=n;const ok=n===q.answer;
       const st=LS.getStat();st.solved++;if(ok)st.correct++;LS.setStat(st);
       LS.addSubjResult(q.subject,ok);LS.addTopicResult(topicOf(q),ok);
-      if(!ok)LS.addWrong(q._k,q.no);SYNC.saveSoon();renderStudy();};
+      if(!ok)LS.addWrong(q._k,q.no);
+      LS.markDay();xpGain(ok?8:2,ok?"배우기 정답":"참여");
+      SYNC.saveSoon();renderStudy();};
     ch.appendChild(d);});
 }
 function studyGo(d){const ni=STUDY.i+d;if(ni<0||ni>=STUDY.qs.length)return;STUDY.i=ni;STUDY.picked=null;renderStudy();}
@@ -1422,7 +1621,8 @@ function renderNote(){
     if(!done)d.onclick=()=>{NOTE.picked=n;renderNote();};ch.appendChild(d);});
 }
 function noteGo(d){const ni=NOTE.i+d;if(ni<0||ni>=NOTE.qs.length)return;NOTE.i=ni;NOTE.picked=null;renderNote();}
-function masterNote(){const q=NOTE.qs[NOTE.i];LS.removeWrong(q._k,q.no);SYNC.saveSoon();
+function masterNote(){const q=NOTE.qs[NOTE.i];LS.removeWrong(q._k,q.no);
+  xpGain(15,"오답 극복! 🔖");SYNC.saveSoon();
   NOTE.qs.splice(NOTE.i,1);if(!NOTE.qs.length){home();return;}
   if(NOTE.i>=NOTE.qs.length)NOTE.i=NOTE.qs.length-1;NOTE.picked=null;renderNote();}
 
