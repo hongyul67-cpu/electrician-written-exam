@@ -75,17 +75,25 @@ function findRow(sh, k) {
 function rcAppend(d) {
   if (RC_SECRET && d.secret !== RC_SECRET) return out({ ok: false, error: 'unauthorized' });
   var toolName = String(d.tool || '기타').slice(0, 60);
+  // 도구가 labels를 보내면 그 용어로 열 이름을 만듦 (예: 블록뷰 → 정답수=완료 개수)
+  // ※ 탭이 처음 생성될 때만 반영됩니다. 이미 있는 탭의 헤더는 그대로예요.
+  var L = d.labels || {};
   var sh = sheetOf(toolName,
-    ['제출시각', '반', '번호', '점수', '정답수', '총문항', '정답률(%)', '오답번호', '소요(초)', '기기']);
+    ['제출시각', '반', '번호', '이름', '학년', '학과',
+     L.score || '점수', L.correct || '정답수', L.total || '총문항', L.rate || '정답률(%)',
+     L.wrong || '오답번호', '소요(초)', '기기',
+     '활동 키워드(생기부용)', '세특 문장(초안)']);
   var correct = numOf(d.correct), total = numOf(d.total);
   var rate = (total !== '' && total > 0) ? Math.round((correct / total) * 100) : '';
   sh.appendRow([
-    new Date(), d.cls || '', d.num || '',
+    new Date(), d.cls || '', d.num || '', d.name || '', d.grade || '', d.dept || '',
     d.score === undefined ? '' : d.score,
     correct, total, rate,
     Array.isArray(d.wrong) ? d.wrong.join(', ') : (d.wrong || ''),
     d.durationSec === undefined ? '' : d.durationSec,
-    String(d.ua || '').slice(0, 60)
+    String(d.ua || '').slice(0, 60),
+    String(d.keywords || '').slice(0, 300),
+    String(d.draft || '').slice(0, 500)
   ]);
   return out({ ok: true });
 }
