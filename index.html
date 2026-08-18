@@ -1533,12 +1533,25 @@ function gibuExtra(){
 function rcReady(){return !!(window.ResultCollector&&ResultCollector.config&&ResultCollector.config.endpoint);}
 function submitResult(){
   if(!rcReady()){
-    alert("결과 제출 링크로 접속했을 때만 제출할 수 있어요. (선생님이 배포한 링크를 사용하세요)");return;}
+      alert(['이 링크로는 제출이 되지 않아요.','',
+        '선생님이 나눠 준 제출용 링크(주소 뒤에 ?rc=... 가 붙은 링크)로',
+        '들어와야 반·번호를 입력하고 결과를 보낼 수 있습니다.','',
+        '연습은 지금 이대로 계속 하셔도 됩니다.'].join(String.fromCharCode(10)));
+    return;
+  }
   const label=modeLabel(CBT.exam);
   const g=LS.getGame(),ti=tierInfo(g.xp);
   ResultCollector.open({
     score:CBT._score, correct:CBT._correct, total:CBT._total,
-    wrong:(CBT._wrong||[]).map(q=>q.no), durationSec:CBT._dur,
+    wrong:(CBT._wrong||[]).map(q=>{
+      const sh=(t,l)=>{t=String(t==null?'':t).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+        return t.length>l?t.slice(0,l-1)+'\u2026':t;};
+      const ch=q.choices||q.opts||[], my=CBT.ans?CBT.ans[q.no]:null;
+      const txt=o=>(o&&typeof o==='object')?(o.t!=null?o.t:o.text):o;
+      const mine=(my!=null&&ch[my-1]!=null)?sh(txt(ch[my-1]),16):(my!=null&&ch[my]!=null?sh(txt(ch[my]),16):'\ubb34\uc751\ub2f5');
+      const ans=(q.answer!=null&&ch[q.answer-1]!=null)?sh(txt(ch[q.answer-1]),16):(ch[q.answer]!=null?sh(txt(ch[q.answer]),16):'?');
+      return q.no+'\ubc88 '+mine+'\u2192'+ans;
+    }), durationSec:CBT._dur,
     mode:label, retry:getTry(label), tier:ti.label,
     detail:ti.label+" · "+(g.xp||0)+"XP", extra:gibuExtra()
   });
