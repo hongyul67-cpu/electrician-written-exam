@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<script src="https://hongyul67-cpu.github.io/links/fixorder.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>전기기능사 필기 · 기출 마스터</title>
 <style>
@@ -161,7 +162,7 @@
   .big .qno{font-size:19px}
   .big .qsubj{font-size:15px}
   .big .expl{font-size:19px;line-height:1.7}
-  .big .qimg{max-height:46vh;object-fit:contain}
+  .big .qimg{width:100%;max-height:46vh;object-fit:contain}
   .clsbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
   .clsbar .btn{padding:11px 15px;font-size:15px}
   .cnt{font-weight:900;font-size:22px;color:#b45309;background:#fff7ed;border:2px solid #fed7aa;
@@ -201,7 +202,9 @@
   .qno{font-weight:800;color:var(--brand);font-size:15px}
   .qsubj{font-size:11.5px;color:var(--muted)}
   .qtext{font-size:16.5px;line-height:1.6;font-weight:600;margin:6px 0 12px;word-break:keep-all}
-  .qimg{width:100%;border:1px solid var(--line);border-radius:10px;margin:4px 0 14px;background:#fff}
+  /* 그림을 원본보다 크게 늘리지 않는다 — 폭 332px 짜리 수식 그림이 721px 로 늘어나 흐릿했다.
+     (410장 중 188장이 600px 미만) 수업 모드(.big)는 프로젝터용이라 아래에서 따로 꽉 채운다. */
+  .qimg{width:auto;max-width:100%;border:1px solid var(--line);border-radius:10px;margin:4px 0 14px;background:#fff}
   .choices{display:flex;flex-direction:column;gap:9px}
   .choice{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;
     padding:12px 13px;cursor:pointer;transition:.12s;background:#fff;font-size:15px;line-height:1.5}
@@ -531,6 +534,7 @@ function home(){
 /* ---------------- CBT ---------------- */
 function startCBTpick(){
   const opts=ROUNDS.map((e,i)=>`<option value="${i}">${e.title}</option>`).join("");
+  const cls=fixMode();
   app.innerHTML=`
   <button class="back" onclick="home()">← 홈</button>
   <div class="card">
@@ -538,12 +542,61 @@ function startCBTpick(){
     <h3 style="margin:10px 0 6px">회차 선택</h3>
     <p style="color:var(--muted);font-size:13.5px;margin:0 0 14px">60문항 · 제한시간 60분 · 60점 이상 합격</p>
     <div class="row"><select id="exSel">${opts}</select></div>
-    <div class="navbtns"><span></span>
-      <button class="btn primary" onclick="startCBT(+$('#exSel').value)">시험 시작 ▶</button></div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px;color:#475569">
+      <input type="checkbox" id="mixCbt" ${cls?"":"checked"}> 문제·보기 순서 섞기</label>
+    <div style="font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6">
+      ${cls
+        ? "🎓 <b>수업용 링크</b>로 들어왔습니다. 꺼 두면 기출 원래 번호 그대로라 «42번 보세요» 가 그대로 통합니다.<br>켜더라도 오늘 이 링크로 들어온 학생은 모두 같은 순서를 받습니다."
+        : "회차에 들어 있는 문제는 그대로이고 나오는 <b>차례</b>와 <b>보기 차례</b>만 바뀝니다.<br>같은 회차를 다시 풀어도 «정답은 3번» 을 외우게 되지 않습니다."}
+    </div>
+    <div class="navbtns" style="margin-top:14px"><span></span>
+      <button class="btn primary" onclick="startCBT(+$('#exSel').value,$('#mixCbt').checked)">시험 시작 ▶</button></div>
   </div>`;
 }
 let CBT=null;
-function startCBT(idx){ startCBTexam(ROUNDS[idx], true); }
+/* ── 회차 안에서 섞기 ──────────────────────────────────────────
+   회차에 든 문제는 그대로 두고 «나오는 차례»와 «보기 차례»만 바꾼다.
+   수업용 링크(?fix=…)로 들어오면 fixorder.js 가 켜지고, 이때는 기본이 «섞지 않음» —
+   기출 번호가 그대로라 "42번 보세요" 가 통한다. 켜더라도 그날 시드로 우리끼리
+   난수를 만들어 쓰므로 학생 전원이 같은 순서를 받는다. */
+function fixMode(){return !!(window.FixOrder&&window.FixOrder.on);}
+function mixRnd(idx){
+  if(!fixMode())return Math.random;
+  let a=(((window.FixOrder.seed>>>0)+idx*0x9E3779B9)>>>0);
+  return function(){a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};
+}
+function shuffledBy(a,rnd){a=a.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor((rnd||Math.random)()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}
+  return a;}
+/* 보기를 섞으면 안 되는 문제
+   ① 보기가 그림 — ①~④ 가 곧 그림 속 차례다
+   ② 문제·보기에 ①~④ 가 적힘 — 도면 품번 같은 다른 뜻일 수 있다
+   ③ «위 모두 옳다» 류 — 자리를 옮기면 말이 되지 않는다 */
+const CIRCLED=/[①②③④]/;
+const AGGREG=/모두 (옳|맞|정답|해당)|위 모두|위의 모두|정답이 없|해당 없/;
+function mixable(q){
+  return !q.choicesImg && !CIRCLED.test(q.q||"")
+      && !(q.choices||[]).some(c=>CIRCLED.test(c)||AGGREG.test(c));
+}
+function mixChoices(q,rnd){
+  if(!mixable(q))return q;
+  const ord=shuffledBy(q.choices.map((_,i)=>i),rnd);   // ord[새자리] = 옛자리
+  const to=[];ord.forEach((old,now)=>{to[old]=now;});  // to[옛자리] = 새자리
+  return Object.assign({},q,{
+    choices:ord.map(i=>q.choices[i]),
+    answer:to[q.answer-1]+1,
+    /* 해설이 «③은 틀림» 처럼 번호를 짚는 경우가 있어 함께 옮긴다 */
+    explain:(q.explain||"").replace(/[①②③④]/g,ch=>NUM[to[NUM.indexOf(ch)-1]+1])
+  });
+}
+function mixExam(e,idx){const rnd=mixRnd(idx);
+  return Object.assign({},e,{questions:shuffledBy(e.questions,rnd).map(q=>mixChoices(q,rnd))});}
+function startCBT(idx,mix){
+  const e=mix?mixExam(ROUNDS[idx],idx):ROUNDS[idx];
+  startCBTexam(e,true);
+  CBT.roundIdx=idx;CBT.mix=!!mix;
+}
 function startCBTexam(e, timed){
   bumpTry(modeLabel(e));                    // 생기부용 도전 횟수
   const dur=e.questions.length*60;          // 문항당 1분 (60문항→60분)
@@ -1418,7 +1471,7 @@ function retryCBT(){
     const ex=cfg.mode==="weak"?buildWeakExam(cfg):cfg.mode==="bank"?buildBankExam(cfg)
             :cfg.mode==="topic"?buildTopicExam(cfg):buildRandomExam(cfg);
     startCBTexam(ex,cfg.timed);}
-  else startCBT(ROUNDS.indexOf(CBT.exam));
+  else startCBT(CBT.roundIdx!=null?CBT.roundIdx:ROUNDS.indexOf(CBT.exam),CBT.mix);
 }
 function updateTimer(){if(!CBT||!CBT.timed)return;const t=$("#timer");if(!t)return;const m=Math.floor(CBT.left/60),s=CBT.left%60;
   t.textContent=`⏱ ${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;t.classList.toggle("warn",CBT.left<=300);}
@@ -1431,7 +1484,7 @@ function renderCBT(){
     ${CBT.timed?`<span class="timer" id="timer">⏱ --:--</span>`:`<span class="timer" style="background:#eef2ff;color:#3730a3;border-color:#c7d2fe">∞ 제한시간 없음</span>`}
   </div>
   <div class="card">
-    <div class="qhead"><span class="qno">문 ${q.no} / ${e.questions.length}</span><span class="qsubj">${esc(q.subject)}</span></div>
+    <div class="qhead"><span class="qno">문 ${CBT.i+1} / ${e.questions.length}</span><span class="qsubj">${esc(q.subject)}</span></div>
     <div class="qtext">${esc(q.q)}</div>
     ${q.img?`<img class="qimg" src="${q.img}" alt="문제 그림">`:""}
     <div class="choices" id="choices"></div>
@@ -1453,7 +1506,7 @@ function renderCBT(){
     d.innerHTML=`<span class="num">${NUM[n]}</span><span>${q.choicesImg?"":esc(c)}</span>`;
     d.onclick=()=>{CBT.ans[q.no]=n;renderCBT();};ch.appendChild(d);});
   const omr=$("#omr");
-  e.questions.forEach((qq,k)=>{const b=document.createElement("button");b.textContent=qq.no;
+  e.questions.forEach((qq,k)=>{const b=document.createElement("button");b.textContent=k+1;
     if(CBT.ans[qq.no])b.classList.add("done");if(k===CBT.i)b.classList.add("cur");
     b.onclick=()=>{CBT.i=k;renderCBT();};omr.appendChild(b);});
   updateTimer();
