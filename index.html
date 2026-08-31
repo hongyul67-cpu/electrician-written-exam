@@ -205,6 +205,7 @@
   /* 그림을 원본보다 크게 늘리지 않는다 — 폭 332px 짜리 수식 그림이 721px 로 늘어나 흐릿했다.
      (410장 중 188장이 600px 미만) 수업 모드(.big)는 프로젝터용이라 아래에서 따로 꽉 채운다. */
   .qimg{width:auto;max-width:100%;border:1px solid var(--line);border-radius:10px;margin:4px 0 14px;background:#fff}
+  .explimg{display:block;margin:10px 0 2px;max-height:none}
   .choices{display:flex;flex-direction:column;gap:9px}
   .choice{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;
     padding:12px 13px;cursor:pointer;transition:.12s;background:#fff;font-size:15px;line-height:1.5}
@@ -456,6 +457,15 @@ const examKey=e=>e.year+"-"+e.round;
 function findQ(k,no){const e=EXAMS.find(x=>examKey(x)===k);return e?e.questions.find(q=>q.no===no):null;}
 function allSubjects(){const s=new Set();EXAMS.forEach(e=>e.questions.forEach(q=>s.add(q.subject)));return[...s];}
 function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+/* 해설 본문 + 풀이 그림.
+   계산 문제는 수식이 PDF 특수 글꼴이라 글로 옮기지 못해 "해설 없음"으로 두었었다.
+   풀이를 오려 둔 그림(images/expl/…)이 있으면 해설 자리에 함께 보여 준다. */
+function explHTML(q){
+  const t = esc(q.explain);
+  if(!q.explainImg) return t;
+  return t + `<img class="qimg tapzoom explimg" src="${q.explainImg}" alt="풀이 그림"
+      onclick="imgZoom('${q.explainImg}')" loading="lazy">`;
+}
 
 /* ---------------- HOME ---------------- */
 function home(){
@@ -576,7 +586,9 @@ function shuffledBy(a,rnd){a=a.slice();
 const CIRCLED=/[①②③④]/;
 const AGGREG=/모두 (옳|맞|정답|해당)|위 모두|위의 모두|정답이 없|해당 없/;
 function mixable(q){
-  return !q.choicesImg && !CIRCLED.test(q.q||"")
+  /* ④ 풀이 그림이 붙은 문항 — 그림 속 풀이가 «정답은 ③» 처럼 보기 번호를 짚을 수 있어
+        보기를 옮기면 해설과 어긋난다. 계산 문제라 순서를 외울 여지도 적다. */
+  return !q.choicesImg && !q.explainImg && !CIRCLED.test(q.q||"")
       && !(q.choices||[]).some(c=>CIRCLED.test(c)||AGGREG.test(c));
 }
 function mixChoices(q,rnd){
@@ -1168,7 +1180,7 @@ function renderClass(){
     <div class="qtext">${esc(q.q)}</div>
     ${q.img?`<img class="qimg tapzoom" src="${q.img}" onclick="imgZoom('${q.img}')" alt="문제 그림">`:""}
     <div class="choices" id="choices"></div>
-    ${rev?`<div class="expl show"><b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b><b>해설</b> · ${esc(q.explain)}</div>`:""}
+    ${rev?`<div class="expl show"><b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b><b>해설</b> · ${explHTML(q)}</div>`:""}
     <div class="clsbar">
       <button class="btn ghost" onclick="classGo(-1)" ${CLS.i===0?"disabled":""}>◀ 이전</button>
       ${CLS.secs?`<button class="btn ghost" onclick="classTimer()">${CLS.timer?"⏸ 멈춤":"⏱ 시작"}</button>
@@ -1261,7 +1273,7 @@ function renderTog(){
     ${u.hint?`<div class="hintbox">💡 <b>힌트</b> · 이 문제는 출제기준 <b>${esc(crit||"-")}</b> 항목입니다.
         ${tp?`<br><button class="btn" style="margin-top:8px;background:#0891b2;color:#fff;padding:8px 12px;font-size:13.5px"
             onclick="imgZoom('${tp.img}')">📘 관련 핵심이론 보기 (${esc(tp.subject)} · ${esc(tp.topic)})</button>`:""}</div>`:""}
-    ${done?`<div class="expl show"><b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b><b>해설</b> · ${esc(q.explain)}</div>`:""}
+    ${done?`<div class="expl show"><b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b><b>해설</b> · ${explHTML(q)}</div>`:""}
     ${TOG.msg?`<div style="margin-top:10px;font-size:16px;font-weight:800;text-align:center">${TOG.msg}</div>`:""}
     <div class="steps">
       <button class="btn ghost" onclick="togHint()" ${u.hint||done?"disabled":""}>💡 힌트 (-1점)</button>
@@ -1645,7 +1657,7 @@ function reviewCBT(){
           if(n===my)return `<div class="tag-no">${NUM[n]} ${t} ✘ 내 답</div>`;
           return `<div style="color:#94a3b8">${NUM[n]} ${t}</div>`;}).join("")}
       </div>
-      <div class="expl show"><b>해설</b> · ${esc(q.explain)}</div>
+      <div class="expl show"><b>해설</b> · ${explHTML(q)}</div>
     </div>`;
   });
   html+=`</div>`;app.innerHTML=html;
@@ -1688,7 +1700,7 @@ function renderStudy(){
     <div class="qtext">${esc(q.q)}</div>
     ${q.img?`<img class="qimg" src="${q.img}">`:""}
     <div class="choices" id="choices"></div>
-    <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${esc(q.explain)}</div>
+    <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${explHTML(q)}</div>
     <div class="navbtns">
       <button class="btn ghost" onclick="studyGo(-1)" ${STUDY.i===0?"disabled":""}>◀ 이전</button>
       <button class="btn primary" onclick="studyGo(1)" ${STUDY.i===STUDY.qs.length-1?"disabled":""}>다음 ▶</button>
@@ -1729,7 +1741,7 @@ function renderNote(){
     <div class="qtext">${esc(q.q)}</div>
     ${q.img?`<img class="qimg" src="${q.img}">`:""}
     <div class="choices" id="choices"></div>
-    <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${esc(q.explain)}</div>
+    <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${explHTML(q)}</div>
     <div class="navbtns">
       <button class="btn ghost" onclick="noteGo(-1)" ${NOTE.i===0?"disabled":""}>◀ 이전</button>
       <button class="btn ghost" onclick="masterNote()">✓ 익힘(삭제)</button>
