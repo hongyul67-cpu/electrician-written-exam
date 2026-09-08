@@ -242,7 +242,7 @@
   @media(max-width:520px){.omr{grid-template-columns:repeat(8,1fr)}.modes{grid-template-columns:1fr}.mode.wide{grid-column:auto}}
 </style>
 </head>
-<body>
+<body data-build="92fbc1c1">
 <div class="wrap">
   <header class="top">
     <div class="logo">⚡</div>
@@ -260,30 +260,6 @@
   <div class="foot">합격 기준: 100점 만점 60점 이상 · 데이터 출처: 전기기능사 필기 CBT 기출복원문제</div>
 </div>
 
-<script src="data/2025-4.js"></script>
-<script src="data/2025-3.js"></script>
-<script src="data/2025-2.js"></script>
-<script src="data/2025-1.js"></script>
-<script src="data/2024-4.js"></script>
-<script src="data/2024-3.js"></script>
-<script src="data/2024-2.js"></script>
-<script src="data/2024-1.js"></script>
-<script src="data/2023-4.js"></script>
-<script src="data/2023-3.js"></script>
-<script src="data/2023-2.js"></script>
-<script src="data/2023-1.js"></script>
-<script src="data/2022-4.js"></script>
-<script src="data/2022-3.js"></script>
-<script src="data/2022-2.js"></script>
-<script src="data/2022-1.js"></script>
-<script src="data/2021-4.js"></script>
-<script src="data/2021-3.js"></script>
-<script src="data/2021-2.js"></script>
-<script src="data/2021-1.js"></script>
-<script src="data/2020-4.js"></script>
-<script src="data/2020-3.js"></script>
-<script src="data/2020-2.js"></script>
-<script src="data/2020-1.js"></script>
 <script src="data/bank-500.js"></script>
 <script src="data/theory.js"></script>
 <script src="data/concepts-theory.js"></script>
@@ -295,10 +271,177 @@
 <script src="data/calcs.js"></script>
 <script src="data/lessons.js"></script>
 <script src="config.js"></script>
+
+<!-- ══ 기출 잠금 ══════════════════════════════════════════════════
+     기출 회차 문항과 문제 그림은 외부 저작물이라 bank.enc / enc/*.enc 로
+     암호화해 올린다. 이론·개념은 직접 만든 것이라 코드 없이 그대로 열린다.
+     정적 호스팅에서는 화면 암호 칸이 보호가 안 되므로(파일 주소를 직접 치면
+     받아진다) 파일 자체를 AES-GCM 으로 잠그고 여기서 WebCrypto 로 푼다. -->
+<style>
+  #exlock{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;
+    background:rgba(15,23,42,.92);padding:20px}
+  #exlock.hidden{display:none}
+  #exlock .box{background:#fff;border-radius:18px;padding:26px 24px;max-width:430px;width:100%;
+    text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+  #exlock h3{margin:10px 0 6px;font-size:19px}
+  #exlock p{margin:0 0 14px;font-size:13.5px;line-height:1.7;color:#64748b}
+  #exlock .row{display:flex;gap:8px}
+  #exlock input{flex:1;padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+  #exlock button{padding:12px 18px;border:0;border-radius:10px;background:#2563eb;color:#fff;
+    font-weight:700;font-size:15px;cursor:pointer}
+  #exlock .msg{margin-top:12px;font-size:13.5px;min-height:20px;line-height:1.6}
+  #exlock .skip{margin-top:14px;font-size:13px;color:#2563eb;background:none;padding:0;
+    text-decoration:underline;font-weight:600}
+</style>
+<div id="exlock">
+  <div class="box">
+    <div style="font-size:40px">🔒</div>
+    <h3>기출 문제는 잠겨 있어요</h3>
+    <p>기출 회차와 문제 그림은 <b>교재·기출 저작물</b>이라 코드가 있어야 열립니다.<br>
+       <b>이론·개념 배우기는 코드 없이</b> 그대로 쓸 수 있어요.</p>
+    <div class="row">
+      <input id="exlockPw" type="password" inputmode="text" autocomplete="off"
+             placeholder="선생님께 받은 8자리 코드">
+      <button id="exlockGo">열기</button>
+    </div>
+    <div class="msg" id="exlockMsg"></div>
+    <button class="skip" id="exlockSkip">코드 없이 이론만 보기 →</button>
+  </div>
+</div>
+<script>
+(function(){
+  var LOCK_KEY='elecexam_v1_pw', SHARED_KEY='hong_pw_v1';
+  var CK=null, BUILD='';
+  var b64 = function(x){ return Uint8Array.from(atob(x), function(c){return c.charCodeAt(0);}); };
+  var isoOf = function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  var mondayOf = function(d){ var x=new Date(d); x.setDate(x.getDate()-((x.getDay()+6)%7)); x.setHours(0,0,0,0); return x; };
+  var $$ = function(id){ return document.getElementById(id); };
+  var INFO=null;
+
+  function say(t,c){ var m=$$('exlockMsg'); if(!m) return;
+    m.innerHTML=t; m.style.color = c==='bad' ? '#dc2626' : (c==='ok' ? '#16a34a' : '#64748b'); }
+
+  async function findKey(kek, keys){
+    for(var i=0;i<keys.length;i++){
+      try{
+        var plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(keys[i].iv)}, kek, b64(keys[i].blob));
+        return JSON.parse(new TextDecoder().decode(plain));
+      }catch(_){}
+    }
+    throw new Error('BADPW');
+  }
+  async function weekCode(msB64, mon){
+    var k = await crypto.subtle.importKey('raw', b64(msB64), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
+    var sig = new Uint8Array(await crypto.subtle.sign('HMAC', k,
+      new TextEncoder().encode((INFO.prefix||'HONGW|') + isoOf(mon))));
+    var n = ((sig[0]<<24)>>>0) + (sig[1]<<16) + (sig[2]<<8) + sig[3];
+    return String(n % 90000000 + 10000000);
+  }
+
+  /* 그림 — src 를 바로 박지 않고 data-img 만 두었다가, 풀린 뒤 blob 주소로 채운다.
+     잠기지 않은 상태에서 images/ 를 부르면 404 가 나므로 아예 부르지 않는다. */
+  var imgCache = {};
+  function encName(rel){ return rel.replace(/\\/g,'/').replace(/\//g,'__') + '.enc'; }
+  async function imgUrl(rel){
+    if(imgCache[rel]) return imgCache[rel];
+    var r = await fetch('enc/' + encodeURIComponent(encName(rel)) + (BUILD ? '?b='+BUILD : ''), {cache:'force-cache'});
+    if(!r.ok) throw new Error('no enc');
+    var u = new Uint8Array(await r.arrayBuffer());
+    var plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:u.slice(0,12)}, CK, u.slice(12));
+    var url = URL.createObjectURL(new Blob([plain]));
+    imgCache[rel] = url;
+    return url;
+  }
+  function paint(el){
+    var rel = el.getAttribute('data-img');
+    if(!rel || el.dataset.imgDone) return;
+    el.dataset.imgDone = '1';
+    if(!CK) return;
+    imgUrl(rel).then(function(u){ el.src = u; }).catch(function(){});
+  }
+  function scan(node){
+    if(node.nodeType !== 1) return;
+    if(node.matches && node.matches('img[data-img]')) paint(node);
+    if(node.querySelectorAll) Array.prototype.forEach.call(node.querySelectorAll('img[data-img]'), paint);
+  }
+  new MutationObserver(function(ms){
+    ms.forEach(function(m){ Array.prototype.forEach.call(m.addedNodes, scan); });
+  }).observe(document.documentElement, {childList:true, subtree:true});
+  window.__paintImgs = function(){ scan(document.body); };
+
+  async function unlock(pw, quiet){
+    try{
+      if(!quiet) say('여는 중…');
+      var blob = await (await fetch('bank.enc',{cache:'no-store'})).json();
+      var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+      var kek = await crypto.subtle.deriveKey(
+        {name:'PBKDF2', salt:b64(blob.kdf.salt), iterations:blob.kdf.iter, hash:'SHA-256'},
+        base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+      var info = await findKey(kek, blob.keys);
+      var today = isoOf(new Date());
+      if(info.nbf && today < info.nbf){ var e1=new Error('NOTYET'); e1.when=info.nbf; throw e1; }
+      if(info.exp && today >= info.exp){ var e2=new Error('EXPIRED'); e2.when=info.exp; throw e2; }
+      INFO = info;
+      CK = await crypto.subtle.importKey('raw', b64(info.ck), {name:'AES-GCM'}, false, ['decrypt']);
+      BUILD = blob.build || document.body.dataset.build || '';
+
+      var sealed = b64(blob.data);
+      var plain = await crypto.subtle.decrypt({name:'AES-GCM', iv:sealed.slice(0,12)}, CK, sealed.slice(12));
+      var ds = new DecompressionStream('gzip');
+      var txt = await new Response(new Blob([plain]).stream().pipeThrough(ds)).text();
+      var payload = JSON.parse(txt);
+
+      window.__setExams(payload.exams || []);
+      try{
+        localStorage.setItem(LOCK_KEY, pw);
+        if(!info.exp) localStorage.setItem(SHARED_KEY, pw);
+      }catch(_){}
+
+      var extra = '';
+      if(!quiet && info.role==='teacher' && info.ms){
+        var c = await weekCode(info.ms, mondayOf(new Date()));
+        extra = '<br><b>이번 주 학생 코드 — ' + c.slice(0,4) + ' ' + c.slice(4) + '</b>';
+      }
+      say('✅ 기출이 열렸어요!' + extra, 'ok');
+      window.__bootExam();
+      setTimeout(function(){ $$('exlock').classList.add('hidden'); }, extra ? 2600 : 400);
+      return true;
+    }catch(e){
+      var m = e && e.message;
+      if(m === 'EXPIRED')      say('사용 기간이 끝난 코드예요(' + e.when + '까지). 이번 주 코드를 받으세요.', 'bad');
+      else if(m === 'NOTYET')  say('아직 쓸 수 없는 코드예요. ' + e.when + '부터 씁니다.', 'bad');
+      else if(!quiet)          say('코드가 맞지 않아요.', 'bad');
+      return false;
+    }
+  }
+
+  function boot(){
+    $$('exlockGo').onclick = function(){ unlock($$('exlockPw').value.replace(/\s+/g,'')); };
+    $$('exlockPw').addEventListener('keydown', function(e){ if(e.key==='Enter') $$('exlockGo').click(); });
+    $$('exlockSkip').onclick = function(){ $$('exlock').classList.add('hidden'); window.__bootExam(); };
+    /* 전에 열었던 기기면 묻지 않고 그대로 연다 */
+    var tries = [];
+    try{
+      var a = localStorage.getItem(LOCK_KEY), b = localStorage.getItem(SHARED_KEY);
+      if(a) tries.push(a);
+      if(b && b !== a) tries.push(b);
+    }catch(_){}
+    (function next(i){
+      if(i >= tries.length) return;
+      unlock(tries[i], true).then(function(ok){ if(!ok) next(i+1); });
+    })(0);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+
 <script>
 const $=(s,el=document)=>el.querySelector(s);
 const app=$("#app");
-const EXAMS=(window.EXAMS||[]).sort((a,b)=>(b.year-a.year)||(b.round-a.round));
+let EXAMS=[];
+/* 기출은 bank.enc 에서 풀려 들어온다. 잠금이 풀리기 전에는 비어 있다. */
+window.__setExams=function(a){ EXAMS=(a||[]).slice().sort((x,y)=>(y.year-x.year)||(y.round-x.round)); };
 const ROUNDS=EXAMS.filter(e=>!e.bank);          // 실제 회차(CBT 모의고사용)
 const BANKS=EXAMS.filter(e=>e.bank);            // 반복기출 500제(과목별 3세트)
 const NUM=["","①","②","③","④","⑤"];
@@ -468,7 +611,7 @@ function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace
 function explHTML(q){
   const t = esc(q.explain);
   if(!q.explainImg) return t;
-  return t + `<img class="qimg tapzoom explimg" src="${q.explainImg}" alt="풀이 그림"
+  return t + `<img class="qimg tapzoom explimg" data-img="${q.explainImg}" alt="풀이 그림"
       onclick="imgZoom('${q.explainImg}')" loading="lazy">`;
 }
 
@@ -1183,7 +1326,7 @@ function renderClass(){
     <div class="qhead"><span class="qno">문 ${CLS.i+1} / ${CLS.qs.length}</span>
       <span class="qsubj">${esc(q.subject)} · ${esc(q._k)}</span></div>
     <div class="qtext">${esc(q.q)}</div>
-    ${q.img?`<img class="qimg tapzoom" src="${q.img}" onclick="imgZoom('${q.img}')" alt="문제 그림">`:""}
+    ${q.img?`<img class="qimg tapzoom" data-img="${q.img}" onclick="imgZoom('${q.img}')" alt="문제 그림">`:""}
     <div class="choices" id="choices"></div>
     ${rev?`<div class="expl show"><b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b><b>해설</b> · ${explHTML(q)}</div>`:""}
     <div class="clsbar">
@@ -1273,7 +1416,7 @@ function renderTog(){
     <div class="qhead"><span class="qno">${TOG.i+1} / ${TOG.qs.length}</span>
       <span class="qsubj">${esc(q.subject)} · ${esc(q._k)}</span></div>
     <div class="qtext">${esc(q.q)}</div>
-    ${q.img?`<img class="qimg tapzoom" src="${q.img}" onclick="imgZoom('${q.img}')" alt="문제 그림">`:""}
+    ${q.img?`<img class="qimg tapzoom" data-img="${q.img}" onclick="imgZoom('${q.img}')" alt="문제 그림">`:""}
     <div class="choices" id="choices"></div>
     ${u.hint?`<div class="hintbox">💡 <b>힌트</b> · 이 문제는 출제기준 <b>${esc(crit||"-")}</b> 항목입니다.
         ${tp?`<br><button class="btn" style="margin-top:8px;background:#0891b2;color:#fff;padding:8px 12px;font-size:13.5px"
@@ -1391,7 +1534,7 @@ function renderTheory(){
       <b style="font-size:14px">${esc(p.subject)}${p.topic?" · "+esc(p.topic):""}</b>
       <span style="font-size:12.5px;color:var(--muted)">${THEO.i+1} / ${THEO.list.length}쪽 · 🔍 눌러서 확대</span>
     </div>
-    <img class="qimg tapzoom" style="margin-top:8px" src="${p.img}" alt="핵심이론 ${esc(p.subject)}"
+    <img class="qimg tapzoom" style="margin-top:8px" data-img="${p.img}" alt="핵심이론 ${esc(p.subject)}"
          onclick="imgZoom('${p.img}')">
     ${crit&&cnt?`<button class="btn" style="width:100%;margin-top:10px;background:#0891b2;color:#fff"
          onclick="topicLearn('${esc(crit)}')">🔥 이 주제 문제 풀어보기 · ${esc(crit)} (${cnt}문항)</button>`:""}
@@ -1417,7 +1560,7 @@ function imgZoom(src){
       <span class="zoomhint">· 두 손가락으로도 확대돼요</span>
       <button class="close" onclick="closeZoom()">✕ 닫기</button>
     </div>
-    <div class="zoomwrap" id="zoomwrap"><img id="zoomimg" src="${src}" alt="확대 보기"></div>`;
+    <div class="zoomwrap" id="zoomwrap"><img id="zoomimg" data-img="${src}" alt="확대 보기"></div>`;
   document.body.appendChild(ov);
   document.body.style.overflow="hidden";
 }
@@ -1503,7 +1646,7 @@ function renderCBT(){
   <div class="card">
     <div class="qhead"><span class="qno">문 ${CBT.i+1} / ${e.questions.length}</span><span class="qsubj">${esc(q.subject)}</span></div>
     <div class="qtext">${esc(q.q)}</div>
-    ${q.img?`<img class="qimg" src="${q.img}" alt="문제 그림">`:""}
+    ${q.img?`<img class="qimg" data-img="${q.img}" alt="문제 그림">`:""}
     <div class="choices" id="choices"></div>
     <div class="navbtns">
       <button class="btn ghost" onclick="cbtGo(-1)" ${CBT.i===0?"disabled":""}>◀ 이전</button>
@@ -1655,7 +1798,7 @@ function reviewCBT(){
     html+=`<div class="miniq">
       <div class="qhead"><span class="qno">문 ${q.no}</span><span class="qsubj">${esc(q.subject)}</span></div>
       <div class="qtext">${esc(q.q)}</div>
-      ${q.img?`<img class="qimg" src="${q.img}">`:""}
+      ${q.img?`<img class="qimg" data-img="${q.img}">`:""}
       <div style="font-size:14px;line-height:1.7">
         ${q.choices.map((c,k)=>{const n=k+1;let t=q.choicesImg?"":esc(c);
           if(n===q.answer)return `<div class="tag-ok">${NUM[n]} ${t} ✔ 정답</div>`;
@@ -1703,7 +1846,7 @@ function renderStudy(){
   <div class="card">
     <div class="qhead"><span class="qno">${STUDY.i+1} / ${STUDY.qs.length}</span><span class="qsubj">${esc(q.subject)} · ${q._k}</span></div>
     <div class="qtext">${esc(q.q)}</div>
-    ${q.img?`<img class="qimg" src="${q.img}">`:""}
+    ${q.img?`<img class="qimg" data-img="${q.img}">`:""}
     <div class="choices" id="choices"></div>
     <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${explHTML(q)}</div>
     <div class="navbtns">
@@ -1744,7 +1887,7 @@ function renderNote(){
   <div class="card">
     <div class="qhead"><span class="qno">오답 ${NOTE.i+1} / ${NOTE.qs.length}</span><span class="qsubj">${esc(q.subject)} · ${q._k}</span></div>
     <div class="qtext">${esc(q.q)}</div>
-    ${q.img?`<img class="qimg" src="${q.img}">`:""}
+    ${q.img?`<img class="qimg" data-img="${q.img}">`:""}
     <div class="choices" id="choices"></div>
     <div class="expl ${done?"show":""}">${done?`<b class="ansline">✅ 정답 ${NUM[q.answer]}번${q.choicesImg?" (위 그림 참고)":""}</b>`:""}<b>해설</b> · ${explHTML(q)}</div>
     <div class="navbtns">
@@ -1765,10 +1908,12 @@ function masterNote(){const q=NOTE.qs[NOTE.i];LS.removeWrong(q._k,q.no);
   NOTE.qs.splice(NOTE.i,1);if(!NOTE.qs.length){home();return;}
   if(NOTE.i>=NOTE.qs.length)NOTE.i=NOTE.qs.length-1;NOTE.picked=null;renderNote();}
 
-/* boot */
-if(!EXAMS.length){app.innerHTML=`<div class="card"><div class="empty">문제 데이터를 불러오지 못했습니다.</div></div>`;}
-else if(SYNC.on()&&!SYNC.me()){gate();}
-else home();
+/* boot — 잠금이 풀리거나 "코드 없이 보기" 를 누르면 불린다 */
+window.__bootExam=function(){
+  if(SYNC.on()&&!SYNC.me()){gate();}
+  else home();
+  if(window.__paintImgs) window.__paintImgs();
+};
 </script>
 <!-- 결과 수집 위젯:
      · config.js의 resultEndpoint를 채우면 → 결과 화면에 [📤 결과 제출] 버튼이 항상 표시
