@@ -417,7 +417,20 @@
 
   function boot(){
     $$('exlockGo').onclick = function(){ unlock($$('exlockPw').value.replace(/\s+/g,'')); };
-    $$('exlockPw').addEventListener('keydown', function(e){ if(e.key==='Enter') $$('exlockGo').click(); });
+    /* Enter 로도 열리게 — key 이름이 브라우저마다 다르고(Enter/Return),
+       한글 입력기가 켜져 있으면 첫 Enter 가 조합 확정에 먹히기도 한다.
+       그래서 이름·코드를 함께 보고 keyup 에서도 한 번 더 받는다. */
+    var goOnEnter = function(e){
+      var k = e.key || '';
+      if(k === 'Enter' || k === 'Return' || e.keyCode === 13 || e.which === 13){
+        e.preventDefault();
+        $$('exlockGo').click();
+      }
+    };
+    $$('exlockPw').addEventListener('keydown', goOnEnter);
+    $$('exlockPw').addEventListener('keyup', function(e){
+      if(!$$('exlockMsg').innerHTML) goOnEnter(e);
+    });
     $$('exlockSkip').onclick = function(){ $$('exlock').classList.add('hidden'); window.__bootExam(); };
     /* 전에 열었던 기기면 묻지 않고 그대로 연다 */
     var tries = [];
