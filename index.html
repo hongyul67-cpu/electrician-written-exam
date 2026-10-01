@@ -206,6 +206,11 @@
      (410장 중 188장이 600px 미만) 수업 모드(.big)는 프로젝터용이라 아래에서 따로 꽉 채운다. */
   .qimg{width:auto;max-width:100%;border:1px solid var(--line);border-radius:10px;margin:4px 0 14px;background:#fff}
   .explimg{display:block;margin:10px 0 2px;max-height:none}
+  /* 해설 그림(figs.js) — 해설이 열린 뒤에만 보인다 */
+  .explfig{margin:12px 0 2px;padding-top:10px;border-top:1px dashed var(--line)}
+  .explfig-h{font-weight:800;font-size:13.5px;color:#0e7490;margin-bottom:6px}
+  .explfig .fig-gallery,.calcfig .fig-gallery{margin:0}
+  .calcfig{margin-top:12px}
   .choices{display:flex;flex-direction:column;gap:9px}
   .choice{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;
     padding:12px 13px;cursor:pointer;transition:.12s;background:#fff;font-size:15px;line-height:1.5}
@@ -270,6 +275,9 @@
 <script src="data/concepts-setup2.js"></script>
 <script src="data/calcs.js"></script>
 <script src="data/lessons.js"></script>
+<!-- 해설 그림 — 공용 fig.js(사본 금지) 다음에 이 도구의 figs.js. 개념 그림(CONCEPTS)을 읽으므로 concepts-*.js 뒤, lesson.js 앞 -->
+<script src="https://hongyul67-cpu.github.io/links/fig.js"></script>
+<script src="figs.js"></script>
 <script src="config.js"></script>
 
 <!-- ══ 기출 잠금 ══════════════════════════════════════════════════
@@ -452,11 +460,19 @@
 <script>
 const $=(s,el=document)=>el.querySelector(s);
 const app=$("#app");
-let EXAMS=[];
-/* 기출은 bank.enc 에서 풀려 들어온다. 잠금이 풀리기 전에는 비어 있다. */
-window.__setExams=function(a){ EXAMS=(a||[]).slice().sort((x,y)=>(y.year-x.year)||(y.round-x.round)); };
-const ROUNDS=EXAMS.filter(e=>!e.bank);          // 실제 회차(CBT 모의고사용)
-const BANKS=EXAMS.filter(e=>e.bank);            // 반복기출 500제(과목별 3세트)
+/* 기출 회차는 bank.enc 에서 풀려 들어온다. 잠금이 풀리기 전에는 비어 있다.
+   반복기출 500제(data/bank-500.js)는 직접 만든 것이라 평문 — 처음부터 있다.
+   ROUNDS · BANKS 는 잠금이 풀릴 때 다시 만든다(예전에는 빈 EXAMS 로 한 번만 만들어 회차·500제 목록이 비었다). */
+const PLAIN_BANKS=(window.EXAMS||[]).filter(e=>e.bank);
+let EXAMS=PLAIN_BANKS.slice();
+let ROUNDS=[];                                  // 실제 회차(CBT 모의고사용)
+let BANKS=PLAIN_BANKS.slice();                  // 반복기출 500제(과목별 3세트)
+window.__setExams=function(a){
+  a=a||[];
+  const extra=PLAIN_BANKS.filter(b=>!a.some(x=>x.bank&&x.title===b.title));
+  EXAMS=a.concat(extra).sort((x,y)=>(y.year-x.year)||(y.round-x.round));
+  ROUNDS=EXAMS.filter(e=>!e.bank); BANKS=EXAMS.filter(e=>e.bank);
+};
 const NUM=["","①","②","③","④","⑤"];
 const LS={
   wrongKey:"elecexam_wrong_v1", statKey:"elecexam_stat_v1",
@@ -622,7 +638,7 @@ function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace
    계산 문제는 수식이 PDF 특수 글꼴이라 글로 옮기지 못해 "해설 없음"으로 두었었다.
    풀이를 오려 둔 그림(images/expl/…)이 있으면 해설 자리에 함께 보여 준다. */
 function explHTML(q){
-  const t = esc(q.explain);
+  const t = esc(q.explain) + (window.explFigHTML ? window.explFigHTML(q) : "");
   if(!q.explainImg) return t;
   return t + `<img class="qimg tapzoom explimg" data-img="${q.explainImg}" alt="풀이 그림"
       onclick="imgZoom('${q.explainImg}')" loading="lazy">`;
@@ -659,7 +675,7 @@ function home(){
       </div>
       <div class="mode wide" onclick="conceptOpen()" style="border-color:#a5f3fc;background:#ecfeff">
         <div class="ic">🖼️</div><h3>그림으로 개념 잡기</h3>
-        <p>옴의 법칙·플레밍 법칙·변압기·3로 스위치·장주까지 <b>그림 26장</b>으로 개념 설명. 수업 화면에 띄우기 좋아요.</p>
+        <p>옴의 법칙·플레밍 법칙·변압기·3로 스위치·장주까지 <b>그림 ${(window.CONCEPTS||[]).length}장</b>으로 개념 설명. 수업 화면에 띄우기 좋아요.</p>
       </div>
       <div class="mode wide" onclick="theoryOpen()">
         <div class="ic">📘</div><h3>핵심이론 요약</h3>
@@ -1154,6 +1170,7 @@ function calcShow(i){
     ${c.steps.map((st,k)=>`<div class="kstep"><div class="kn">${k+1}</div><div class="ktxt">
       <div class="ksay">${esc(st[0])}</div><div class="kmath">${esc(st[1])}</div></div></div>`).join("")}
     <div class="kans">✅ 정답 ${NUM[c.a]} ${esc(c.ch[c.a-1])}</div>
+    ${window.calcFigHTML?window.calcFigHTML(c.t):""}
     <div class="ktip">💡 ${esc(c.tip)}</div>
     ${cnt?`<button class="btn" style="width:100%;margin-top:11px;background:#0891b2;color:#fff"
         onclick="topicLearn('${esc(c.crit)}')">🔥 같은 항목 문제 풀어보기 · ${esc(c.crit)} (${cnt}문항)</button>`:""}
@@ -1981,7 +1998,7 @@ window.__bootExam=function(){
       sub:'요점 → <b>발문</b> → 퀴즈 → 정답을 하나씩 엽니다. 화면 어디든 바로 판서됩니다.<br>'+
           '요점 속 <b>파란 빈칸</b>은 눌러야 답이 보입니다.',
       menu: menu,
-      fig: function(s){ return s.fig ? LF(s.fig) : ''; }
+      fig: function(s){ return s.fig ? LF(s.fig, s.fig2) : ''; }
     });
   };
 })();
